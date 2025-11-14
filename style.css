@@ -453,8 +453,8 @@ section h2 {
 .entries-table-header {
     display: grid;
     grid-template-columns: 2fr 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 1fr;
-    gap: 10px;
-    padding: 12px 15px;
+    gap: 0;
+    padding: 12px 16px;
     background: var(--bg-primary);
     border-bottom: 1px solid var(--border-default);
     font-weight: 600;
@@ -472,6 +472,18 @@ section h2 {
     font-size: 13px;
     font-weight: 600;
     font-family: 'Inter', sans-serif;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Left-align title header */
+.entries-table-header > div:first-child {
+    text-align: left;
+    justify-content: flex-start;
 }
 
 /* Sortable headers */
@@ -482,17 +494,16 @@ section h2 {
     position: relative;
     font-size: 13px;
     font-weight: 600;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.entries-table-header .sortable:hover {
-    color: var(--text-primary);
-}
-
-.sort-indicator {
-    font-size: 12px;
-    margin-left: 4px;
-    color: var(--accent-primary);
-    font-weight: 700;
+/* Left-align title sortable header */
+.entries-table-header .sortable[data-sort="title"] {
+    text-align: left;
+    justify-content: flex-start;
 }
 
 .entries-table-body {
@@ -523,7 +534,7 @@ section h2 {
 .entry-row {
     display: grid;
     grid-template-columns: 2fr 1.2fr 1.2fr 0.8fr 0.8fr 0.8fr 1fr;
-    gap: 10px;
+    gap: 0;
     padding: 12px 16px; /* Decreased padding to make cards smaller */
     margin: 0 4px 4px 4px; /* Added left/right margin to match bottom margin */
     background: var(--bg-tertiary); /* Lighter cards against darker background */
@@ -548,11 +559,20 @@ section h2 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-right: 1px solid rgba(64, 64, 64, 0.3);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .entry-col-title {
     font-weight: 500;
-    font-size: 14px; /* Consistent font size */
+    font-size: 14px;
+    text-align: left;
+    justify-content: flex-start;
 }
 
 .entry-col-type {
@@ -561,6 +581,7 @@ section h2 {
     gap: 8px;
     font-size: 13px; /* Consistent font size */
     color: var(--text-secondary);
+    justify-content: center;
 }
 
 .entry-type-dot {
@@ -588,12 +609,15 @@ section h2 {
     font-size: 14px; /* Consistent font size */
     color: var(--accent-primary);
     font-variant-numeric: tabular-nums;
+    border-right: none; /* Remove border from last column before actions */
 }
 
 .entry-col-actions {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+    border-right: none; /* Remove border from actions column */
+    padding-left: 10px;
 }
 
 .entry-action-btn {

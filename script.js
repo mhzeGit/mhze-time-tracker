@@ -756,10 +756,10 @@ const ChartRenderer = {
         let labels, datasets;
         
         if (view === 'day') {
-            // Show dates (e.g., "15 Nov" or "11/15")
+            // Show dates (e.g., "15 Nov" or "15/11")
             labels = data.map(d => {
                 const date = new Date(d.date + 'T00:00:00');
-                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
             });
             
             datasets = App.data.types.map(type => ({
@@ -1016,7 +1016,7 @@ const UIRenderer = {
 
     formatDate(dateString) {
         const date = new Date(dateString + 'T00:00:00');
-        return date.toLocaleDateString('en-US', { 
+        return date.toLocaleDateString('en-GB', { 
             year: 'numeric', 
             month: 'short', 
             day: 'numeric'
@@ -1025,9 +1025,9 @@ const UIRenderer = {
 
     formatShortDate(dateString) {
         const date = new Date(dateString + 'T00:00:00');
-        return date.toLocaleDateString('en-US', { 
-            month: '2-digit', 
+        return date.toLocaleDateString('en-GB', { 
             day: '2-digit',
+            month: '2-digit',
             year: '2-digit'
         });
     },
@@ -1279,13 +1279,18 @@ const FilterManager = {
      */
     updateFilterDropdown() {
         const customSelect = document.getElementById('filterType');
+        if (!customSelect) return;
+        
         const dropdown = customSelect.querySelector('.custom-select-dropdown');
         const trigger = customSelect.querySelector('.selected-text');
+        
+        if (!dropdown || !trigger) return;
+        
         const currentValue = App.filters.typeId;
         
         // Clear existing options (keep "All Types")
         dropdown.innerHTML = `
-            <div class="custom-option" data-value="">
+            <div class="custom-option selected" data-value="">
                 <span class="option-text">All Types</span>
             </div>
         `;
@@ -1311,21 +1316,23 @@ const FilterManager = {
             const selectedType = App.data.types.find(t => t.id === currentValue);
             if (selectedType) {
                 trigger.textContent = selectedType.name;
+                
+                // Update selected state
+                dropdown.querySelectorAll('.custom-option').forEach(opt => {
+                    if (opt.dataset.value === currentValue) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
             } else {
                 trigger.textContent = 'All Types';
+                dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
             }
         } else {
             trigger.textContent = 'All Types';
+            dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
         }
-        
-        // Update selected state
-        dropdown.querySelectorAll('.custom-option').forEach(opt => {
-            if (opt.dataset.value === currentValue) {
-                opt.classList.add('selected');
-            } else {
-                opt.classList.remove('selected');
-            }
-        });
     }
 };
 
