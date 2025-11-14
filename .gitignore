@@ -1,0 +1,40 @@
+# Data files (keep your personal data private)
+data.json
+my-data.json
+*.private.json
+*-data.json
+!sample-data.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Visual Studio files
+.vs/
+*.slnx
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+temp/
+tmp/
+
+# Backup files
+*.backup
+*.bak

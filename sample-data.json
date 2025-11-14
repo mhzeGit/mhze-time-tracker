@@ -1,0 +1,98 @@
+{
+  "types": [
+    {
+      "id": "type-550e8400-e29b-41d4-a716-446655440001",
+      "name": "Development",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "type-550e8400-e29b-41d4-a716-446655440002",
+      "name": "Meeting",
+      "color": "#10b981"
+    },
+    {
+      "id": "type-550e8400-e29b-41d4-a716-446655440003",
+      "name": "Research",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "type-550e8400-e29b-41d4-a716-446655440004",
+      "name": "Planning",
+      "color": "#8b5cf6"
+    }
+  ],
+  "entries": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "title": "Frontend Development",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440001",
+      "date": "2024-01-15",
+      "startTime": "09:00",
+      "endTime": "12:30",
+      "durationMinutes": 210
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "title": "Team Meeting",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440002",
+      "date": "2024-01-15",
+      "startTime": "14:00",
+      "endTime": "15:00",
+      "durationMinutes": 60
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "title": "Code Review",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440001",
+      "date": "2024-01-16",
+      "startTime": "10:00",
+      "endTime": "11:30",
+      "durationMinutes": 90
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "title": "Research - New Framework",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440003",
+      "date": "2024-01-16",
+      "startTime": "13:00",
+      "endTime": "16:00",
+      "durationMinutes": 180
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440005",
+      "title": "Bug Fixing",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440001",
+      "date": "2024-01-17",
+      "startTime": "09:30",
+      "endTime": "12:00",
+      "durationMinutes": 150
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440006",
+      "title": "Sprint Planning",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440004",
+      "date": "2024-01-17",
+      "startTime": "13:00",
+      "endTime": "14:30",
+      "durationMinutes": 90
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440007",
+      "title": "API Documentation",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440001",
+      "date": "2024-01-18",
+      "startTime": "09:00",
+      "endTime": "11:00",
+      "durationMinutes": 120
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440008",
+      "title": "Client Meeting",
+      "typeId": "type-550e8400-e29b-41d4-a716-446655440002",
+      "date": "2024-01-18",
+      "startTime": "14:00",
+      "endTime": "15:30",
+      "durationMinutes": 90
+    }
+  ]
+}

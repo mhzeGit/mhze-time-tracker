@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Start - Time Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2563eb;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .step {
+            margin-bottom: 20px;
+            padding-left: 30px;
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #2563eb;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .step h3 {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 16px;
+        }
+        .step p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 10px 10px 0;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn-secondary {
+            background: #64748b;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 12px;
+            margin: 15px 0;
+        }
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>?? Time Tracker - Quick Start</h1>
+    
+    <div class="card">
+        <h2>?? Get Started in 3 Steps</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Open the App</h3>
+            <p>Click the button below to launch the Time Tracker application:</p>
+            <a href="index.html" class="btn">Open Time Tracker ?</a>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Load Sample Data (Optional)</h3>
+            <p>Click "Load Data" in the app and select <code>sample-data.json</code> to see example entries.</p>
+            <p>Or start fresh with an empty app!</p>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Add Your First Entry</h3>
+            <p>Click the "+ Add Task" button and fill in:</p>
+            <ul>
+                <li><strong>Title:</strong> What you worked on</li>
+                <li><strong>Type:</strong> Category (Development, Meeting, etc.)</li>
+                <li><strong>Date:</strong> When you worked</li>
+                <li><strong>Start/End Time:</strong> Your hours</li>
+            </ul>
+            <p>Duration calculates automatically!</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>?? Documentation</h2>
+        <p>Need more help? Check out these guides:</p>
+        <a href="README.md" class="btn btn-secondary">Main README</a>
+        <a href="USER-GUIDE.md" class="btn btn-secondary">User Guide</a>
+        <a href="DEPLOYMENT.md" class="btn btn-secondary">Deployment Guide</a>
+    </div>
+    
+    <div class="card">
+        <h2>?? Saving Your Data</h2>
+        
+        <div class="warning">
+            <strong>?? Important:</strong> Your data is stored in JSON files on your computer. Remember to save your work!
+        </div>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>Click "Save Data" in the app</h3>
+            <p>Choose a location and filename (e.g., <code>my-time-tracker.json</code>)</p>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Keep the file safe</h3>
+            <p>Store it in a memorable location like:</p>
+            <ul>
+                <li>Documents folder</li>
+                <li>Cloud storage (Dropbox, Google Drive)</li>
+                <li>Version control (Git)</li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>Load it next time</h3>
+            <p>Click "Load Data" and select your saved file to continue where you left off.</p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>? Key Features</h2>
+        <ul>
+            <li><strong>Add/Edit/Delete:</strong> Full control over your time entries</li>
+            <li><strong>Automatic Duration:</strong> Calculates time spent automatically</li>
+            <li><strong>Analytics:</strong> Daily and weekly averages</li>
+            <li><strong>Charts:</strong> Visual representation of your time</li>
+            <li><strong>Responsive:</strong> Works on desktop and mobile</li>
+            <li><strong>Offline:</strong> No internet required (after initial load)</li>
+            <li><strong>Private:</strong> All data stays on your device</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h2>?? Deploy Online</h2>
+        <p>Want to access your time tracker from anywhere? Deploy it for free:</p>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>GitHub Pages (Recommended)</h3>
+            <p>Free hosting with custom domain support</p>
+            <ul>
+                <li>Upload files to GitHub repository</li>
+                <li>Enable Pages in repository settings</li>
+                <li>Access at <code>username.github.io/repo-name</code></li>
+            </ul>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>Netlify (Easiest)</h3>
+            <p>Drag & drop deployment</p>
+            <ul>
+                <li>Go to <a href="https://netlify.com" target="_blank">netlify.com</a></li>
+                <li>Drag your project folder</li>
+                <li>Done! Instant URL</li>
+            </ul>
+        </div>
+        
+        <p><a href="DEPLOYMENT.md" class="btn">Full Deployment Guide ?</a></p>
+    </div>
+    
+    <div class="card">
+        <h2>?? Best Practices</h2>
+        <ul>
+            <li>Track time consistently every day</li>
+            <li>Use consistent Type names (Development, Meeting, Research)</li>
+            <li>Save your data file after each session</li>
+            <li>Backup your data file regularly</li>
+            <li>Review weekly analytics to improve productivity</li>
+            <li>Be honest about time spent</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h2>?? Privacy & Security</h2>
+        
+        <div class="success">
+            <strong>? Your data is 100% private:</strong>
+            <ul style="margin-top: 10px;">
+                <li>No backend server</li>
+                <li>No data sent anywhere</li>
+                <li>All processing happens in your browser</li>
+                <li>You control where data is stored</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <strong>?? Remember:</strong> Don't commit your actual data file to public repositories! Use <code>.gitignore</code> to exclude it.
+        </div>
+    </div>
+    
+    <div class="card text-center">
+        <h2>Ready to Start?</h2>
+        <p style="margin-bottom: 20px;">Open the Time Tracker and start tracking your time!</p>
+        <a href="index.html" class="btn">Open Time Tracker ?</a>
+    </div>
+    
+    <div style="text-align: center; color: #666; margin-top: 40px; padding: 20px;">
+        <p>Built with ?? using vanilla HTML, CSS, and JavaScript</p>
+        <p style="margin-top: 10px;">No frameworks • No dependencies • 100% static</p>
+    </div>
+</body>
+</html>

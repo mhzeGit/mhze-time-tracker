@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <h1>Time Tracker</h1>
+            <div class="top-actions">
+                <button id="loadDataBtn" class="btn btn-secondary" title="Load data from JSON file">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 7v13a2 2 0 002 2h14a2 2 0 002-2V7M3 7l9-4 9 4M3 7l9 4m0-4l9 4m-9 0v13"/>
+                        </svg>
+                    </span>
+                    Load Data
+                </button>
+                <button id="saveDataBtn" class="btn btn-secondary" title="Save data to JSON file">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                    </span>
+                    Save Data
+                </button>
+                <button id="addTaskBtn" class="btn btn-primary" title="Add new task">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </span>
+                    Add Task
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Summary Section -->
+            <section class="summary-section">
+                <h2>Summary</h2>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Daily Average</h3>
+                        <p class="summary-value" id="dailyAverage">0h 0m</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Weekly Average</h3>
+                        <p class="summary-value" id="weeklyAverage">0h 0m</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Entries</h3>
+                        <p class="summary-value" id="totalEntries">0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Time</h3>
+                        <p class="summary-value" id="totalTime">0h 0m</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Type Management Section -->
+            <section class="type-management">
+                <h2>Task Types</h2>
+                <div class="type-list" id="typeList">
+                    <!-- Types will be rendered here -->
+                </div>
+                <button id="addTypeBtn" class="btn btn-primary">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </span>
+                    Add Type
+                </button>
+            </section>
+
+            <!-- New Charts Section: Pie Chart and Time Graph -->
+            <section class="analytics-section">
+                <div class="chart-container chart-full">
+                    <h3>Type Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container chart-full">
+                    <div class="chart-header">
+                        <h3>Time Graph</h3>
+                        <div class="view-switcher">
+                            <button class="view-btn active" data-view="day">Day</button>
+                            <button class="view-btn" data-view="week">Week</button>
+                            <button class="view-btn" data-view="month">Month</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="timeGraph"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Entries Section -->
+            <section class="entries-section">
+                <h2>Time Entries</h2>
+                <div class="entries-list" id="entriesList">
+                    <p class="empty-state">No entries yet. Click "Add Task" to get started!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add/Edit Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Task</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Title *</label>
+                    <input type="text" id="taskTitle" required placeholder="e.g., Development work">
+                </div>
+                <div class="form-group">
+                    <label for="taskType">Type *</label>
+                    <select id="taskType" required>
+                        <option value="">Select a type...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskDate">Date *</label>
+                    <input type="date" id="taskDate" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskStartTime">Start Time *</label>
+                        <input type="time" id="taskStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskEndTime">End Time *</label>
+                        <input type="time" id="taskEndTime" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <p class="duration-display" id="durationDisplay">0h 0m</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Type Modal -->
+    <div id="typeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="typeModalTitle">Add Type</h2>
+                <button class="close-btn" id="closeTypeModal">&times;</button>
+            </div>
+            <form id="typeForm">
+                <div class="form-group">
+                    <label for="typeName">Type Name *</label>
+                    <input type="text" id="typeName" required placeholder="e.g., Development, Meeting">
+                </div>
+                <div class="form-group">
+                    <label for="typeColor">Color *</label>
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="typeColor" required value="#3b82f6">
+                        <span class="color-preview" id="colorPreview" style="background-color: #3b82f6;"></span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelTypeBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitTypeBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hidden file input for loading data -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
