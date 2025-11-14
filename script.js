@@ -1415,7 +1415,7 @@ const SortManager = {
             if (header) {
                 const indicator = document.createElement('span');
                 indicator.className = 'sort-indicator';
-                indicator.textContent = this.currentDirection === 'asc' ? ' ?' : ' ?';
+                indicator.innerHTML = this.currentDirection === 'asc' ? ' &uarr;' : ' &darr;';
                 header.appendChild(indicator);
             }
         }
