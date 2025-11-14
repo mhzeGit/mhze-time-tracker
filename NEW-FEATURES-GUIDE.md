@@ -1,15 +1,15 @@
 # Quick Start - New Features
 
-## ?? What's New
+## What's New
 
 Your time tracker now has:
-- ? **Types saved in JSON** - No more lost types!
-- ? **Pie Chart** - See type distribution at a glance
-- ? **Time Graph** - Switch between Day/Week/Month views
+- **Types saved in JSON** - No more lost types!
+- **Pie Chart** - See type distribution at a glance
+- **Time Graph** - Switch between Day/Week/Month views
 
 ---
 
-## ?? Getting Started
+## Getting Started
 
 ### 1. Open the App
 ```
@@ -18,7 +18,7 @@ Double-click index.html
 
 ### 2. Load Your Data (Optional)
 ```
-Click "Load Data" ? Select sample-data.json
+Click "Load Data" -> Select sample-data.json
 ```
 - Types and entries load together
 - Colors automatically restored
@@ -52,14 +52,14 @@ Buttons: Day | Week | Month
 
 ---
 
-## ?? Types Are Now Saved!
+## Types Are Now Saved!
 
 ### Before (Old Behavior)
 ```json
 {
   "entries": [...]
 }
-// Types were reset on each load ?
+// Types were reset on each load
 ```
 
 ### Now (New Behavior)
@@ -68,7 +68,7 @@ Buttons: Day | Week | Month
   "types": [...],
   "entries": [...]
 }
-// Types preserved across sessions ?
+// Types preserved across sessions
 ```
 
 ### What This Means
@@ -80,7 +80,7 @@ Buttons: Day | Week | Month
 
 ---
 
-## ?? Chart Guide
+## Chart Guide
 
 ### Pie Chart - Type Distribution
 
@@ -107,7 +107,7 @@ Click legend = Hide/show type
 
 **Three Modes:**
 
-#### ?? Day Mode (24 Hours)
+#### Day Mode (24 Hours)
 ```
 X-axis: 0:00, 1:00, 2:00 ... 23:00
 Y-axis: Hours worked
@@ -121,11 +121,11 @@ Shows: Today's hourly breakdown
 
 **Example:**
 ```
-9:00  ? 2h (1.5h Dev, 0.5h Meeting)
-14:00 ? 1h (1h Research)
+9:00  -> 2h (1.5h Dev, 0.5h Meeting)
+14:00 -> 1h (1h Research)
 ```
 
-#### ?? Week Mode (7 Days)
+#### Week Mode (7 Days)
 ```
 X-axis: Mon, Tue, Wed, Thu, Fri, Sat, Sun
 Y-axis: Hours worked
@@ -139,11 +139,11 @@ Shows: Last 7 days
 
 **Example:**
 ```
-Mon Jan 15 ? 8h (5h Dev, 2h Meeting, 1h Research)
-Tue Jan 16 ? 6h (4h Dev, 2h Research)
+Mon Jan 15 -> 8h (5h Dev, 2h Meeting, 1h Research)
+Tue Jan 16 -> 6h (4h Dev, 2h Research)
 ```
 
-#### ?? Month Mode (31 Days)
+#### Month Mode (31 Days)
 ```
 X-axis: 1, 2, 3 ... 31
 Y-axis: Hours worked
@@ -157,14 +157,14 @@ Shows: Current month's all days
 
 **Example:**
 ```
-Day 1  ? 7h
-Day 15 ? 8h
-Day 31 ? 6h
+Day 1  -> 7h
+Day 15 -> 8h
+Day 31 -> 6h
 ```
 
 ---
 
-## ?? Common Workflows
+## Common Workflows
 
 ### Workflow 1: First Time Setup
 
@@ -188,7 +188,7 @@ Day 31 ? 6h
 1. **Load your data**:
    - Click "Load Data"
    - Select my-tracker.json
-   - Types restored automatically ?
+   - Types restored automatically
 2. **Add today's tasks**:
    - Type dropdown shows your types
    - Add entries throughout day
@@ -228,28 +228,28 @@ Day 31 ? 6h
 
 ---
 
-## ?? Pro Tips
+## Pro Tips
 
 ### Type Management
 
 **Tip 1: Use Distinct Colors**
 ```
-? Development: Blue (#3b82f6)
-? Meetings: Green (#10b981)
-? Research: Orange (#f59e0b)
+GOOD: Development: Blue (#3b82f6)
+GOOD: Meetings: Green (#10b981)
+GOOD: Research: Orange (#f59e0b)
 
-? Dev: Blue (#3b82f6)
-? Code: Blue (#3b85f6)  ? Too similar!
+BAD: Dev: Blue (#3b82f6)
+BAD: Code: Blue (#3b85f6)  <- Too similar!
 ```
 
 **Tip 2: Keep Types Focused**
 ```
-? Good:
+GOOD:
 - Development
 - Client Calls
 - Admin
 
-? Too granular:
+TOO GRANULAR:
 - React Development
 - Vue Development
 - API Development
@@ -288,16 +288,16 @@ Day 31 ? 6h
 **File Organization:**
 ```
 TimeTracker/
-??? 2024-work.json        (current)
-??? 2024-personal.json    (current)
-??? archive/
-?   ??? 2023-work.json
-?   ??? 2023-personal.json
++-- 2024-work.json        (current)
++-- 2024-personal.json    (current)
++-- archive/
+    +-- 2023-work.json
+    +-- 2023-personal.json
 ```
 
 ---
 
-## ?? Troubleshooting
+## Troubleshooting
 
 ### Types Not Loading
 
@@ -335,7 +335,7 @@ TimeTracker/
 
 ---
 
-## ?? Keyboard Tips
+## Keyboard Tips
 
 **Quick Actions:**
 - `Ctrl/Cmd + S` - Save (may download)
@@ -346,7 +346,7 @@ TimeTracker/
 
 ---
 
-## ?? Mobile Usage
+## Mobile Usage
 
 ### View Switcher on Mobile
 - Buttons stack horizontally
@@ -361,7 +361,7 @@ TimeTracker/
 
 ---
 
-## ? Quick Checklist
+## Quick Checklist
 
 Before you start:
 - [ ] Open index.html
@@ -373,22 +373,22 @@ Before you start:
 - [ ] Save your data
 - [ ] Reload to verify types persist
 
-All working? You're ready! ??
+All working? You're ready!
 
 ---
 
-## ?? Next Steps
+## Next Steps
 
 1. **Create your types** with custom colors
 2. **Add entries** from this week
 3. **Explore pie chart** - See distribution
 4. **Try all three views** - Day/Week/Month
 5. **Save your file** - Types preserved!
-6. **Reload tomorrow** - Types still there ?
+6. **Reload tomorrow** - Types still there
 
 ---
 
-## ?? More Info
+## More Info
 
 - **FEATURE-UPDATE.md** - Detailed technical guide
 - **README.md** - Complete documentation
@@ -397,6 +397,6 @@ All working? You're ready! ??
 
 ---
 
-**Enjoy your enhanced time tracker! ????**
+**Enjoy your enhanced time tracker!**
 
 Types are now permanent, charts are interactive, and insights are instant!

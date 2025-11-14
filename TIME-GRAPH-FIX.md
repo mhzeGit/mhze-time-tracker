@@ -1,4 +1,4 @@
-# Time Graph Fixed! ?
+ï»¿# Time Graph Fixed! ?
 
 ## What Was Wrong
 
@@ -75,7 +75,7 @@ The time graph had several issues:
 - **Day mode**: Date format ("15 Jan", "16 Jan")
 - **Week mode**: Week identifier ("2024-W02")
 - **Month mode**: Day numbers ("1", "2", "3")
-- Rotated at 45° for readability
+- Rotated at 45 for readability
 - Mobile-friendly
 
 ---
@@ -279,3 +279,4 @@ When you load `sample-data.json`, you'll see:
 ? Changes committed and pushed to GitHub  
 
 **The time graph is now fully functional! ????**
+

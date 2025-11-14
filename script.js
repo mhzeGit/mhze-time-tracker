@@ -59,8 +59,11 @@ const DataManager = {
                     App.data.entries = data.entries || [];
                     App.currentFileName = file.name;
                     
+                    // Auto-save to cache after loading
+                    CacheManager.saveCache();
+                    
                     UIRenderer.renderAll();
-                    UIRenderer.showNotification('Data loaded successfully! Types and entries restored.', 'success');
+                    UIRenderer.showNotification('Data loaded and cached successfully!', 'success');
                     resolve(data);
                 } catch (error) {
                     UIRenderer.showNotification('Error loading file: ' + error.message, 'error');
@@ -106,7 +109,10 @@ const DataManager = {
                 App.currentFileHandle = handle;
                 App.currentFileName = handle.name;
                 
-                UIRenderer.showNotification('Data saved successfully! Types and entries preserved.', 'success');
+                // Update cache after successful save
+                CacheManager.saveCache();
+                
+                UIRenderer.showNotification('Data saved and cached successfully!', 'success');
                 return;
             } catch (err) {
                 if (err.name === 'AbortError') {
@@ -123,7 +129,10 @@ const DataManager = {
         a.click();
         URL.revokeObjectURL(url);
         
-        UIRenderer.showNotification('Data downloaded! Types and entries saved.', 'success');
+        // Update cache after download
+        CacheManager.saveCache();
+        
+        UIRenderer.showNotification('Data downloaded and cached!', 'success');
     },
 
     /**
@@ -189,6 +198,7 @@ const TypeManager = {
         };
         
         App.data.types.push(newType);
+        CacheManager.saveCache(); // Auto-cache
         UIRenderer.renderTypes();
         UIRenderer.renderAll();
     },
@@ -200,6 +210,7 @@ const TypeManager = {
                 ...App.data.types[index],
                 ...updatedData
             };
+            CacheManager.saveCache(); // Auto-cache
             UIRenderer.renderTypes();
             UIRenderer.renderAll();
         }
@@ -219,6 +230,7 @@ const TypeManager = {
         }
         
         App.data.types = App.data.types.filter(t => t.id !== id);
+        CacheManager.saveCache(); // Auto-cache
         UIRenderer.renderTypes();
         UIRenderer.renderAll();
     },
@@ -250,6 +262,7 @@ const EntryManager = {
             return dateB - dateA;
         });
         
+        CacheManager.saveCache(); // Auto-cache
         UIRenderer.renderAll();
     },
 
@@ -268,6 +281,7 @@ const EntryManager = {
                 return dateB - dateA;
             });
             
+            CacheManager.saveCache(); // Auto-cache
             UIRenderer.renderAll();
         }
     },
@@ -278,6 +292,7 @@ const EntryManager = {
         }
         
         App.data.entries = App.data.entries.filter(e => e.id !== id);
+        CacheManager.saveCache(); // Auto-cache
         UIRenderer.renderAll();
     },
 
@@ -1227,6 +1242,7 @@ const FilterManager = {
      * Apply filter and update UI
      */
     applyFilters() {
+        CacheManager.saveCache(); // Save filters to cache
         UIRenderer.renderAll();
     },
 
@@ -1242,6 +1258,7 @@ const FilterManager = {
         document.getElementById('filterDateStart').value = '';
         document.getElementById('filterDateEnd').value = '';
         
+        CacheManager.saveCache(); // Update cache
         UIRenderer.renderAll();
     },
 
@@ -1260,6 +1277,107 @@ const FilterManager = {
         if (currentValue && App.data.types.find(t => t.id === currentValue)) {
             select.value = currentValue;
         }
+    }
+};
+
+/**
+ * Local Storage Caching Module
+ * Handles automatic caching of data to prevent loss on refresh
+ */
+const CacheManager = {
+    CACHE_KEY: 'timeTrackerCachedData',
+    FILENAME_KEY: 'timeTrackerCachedFileName',
+    FILTERS_KEY: 'timeTrackerCachedFilters',
+
+    /**
+     * Save current app data to localStorage
+     */
+    saveCache() {
+        try {
+            const dataToCache = {
+                types: App.data.types,
+                entries: App.data.entries
+            };
+            
+            localStorage.setItem(this.CACHE_KEY, JSON.stringify(dataToCache));
+            
+            if (App.currentFileName) {
+                localStorage.setItem(this.FILENAME_KEY, App.currentFileName);
+            }
+            
+            // Also cache current filters
+            localStorage.setItem(this.FILTERS_KEY, JSON.stringify(App.filters));
+            
+            console.log('Data cached successfully');
+        } catch (error) {
+            console.error('Error saving to cache:', error);
+            // Handle quota exceeded or other storage errors
+            if (error.name === 'QuotaExceededError') {
+                UIRenderer.showNotification('Cache storage full. Please save your data manually.', 'error');
+            }
+        }
+    },
+
+    /**
+     * Load cached data from localStorage
+     */
+    loadCache() {
+        try {
+            const cachedData = localStorage.getItem(this.CACHE_KEY);
+            const cachedFileName = localStorage.getItem(this.FILENAME_KEY);
+            const cachedFilters = localStorage.getItem(this.FILTERS_KEY);
+            
+            if (cachedData) {
+                const data = JSON.parse(cachedData);
+                
+                // Validate cached data
+                if (DataManager.validateData(data)) {
+                    App.data.types = data.types || [];
+                    App.data.entries = data.entries || [];
+                    App.currentFileName = cachedFileName || 'cached-data.json';
+                    
+                    // Restore filters
+                    if (cachedFilters) {
+                        const filters = JSON.parse(cachedFilters);
+                        App.filters = filters;
+                        
+                        // Update filter UI
+                        if (filters.typeId) document.getElementById('filterType').value = filters.typeId;
+                        if (filters.dateStart) document.getElementById('filterDateStart').value = filters.dateStart;
+                        if (filters.dateEnd) document.getElementById('filterDateEnd').value = filters.dateEnd;
+                    }
+                    
+                    console.log('Loaded from cache:', App.data.entries.length, 'entries');
+                    return true;
+                }
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('Error loading from cache:', error);
+            return false;
+        }
+    },
+
+    /**
+     * Clear all cached data
+     */
+    clearCache() {
+        try {
+            localStorage.removeItem(this.CACHE_KEY);
+            localStorage.removeItem(this.FILENAME_KEY);
+            localStorage.removeItem(this.FILTERS_KEY);
+            console.log('Cache cleared');
+        } catch (error) {
+            console.error('Error clearing cache:', error);
+        }
+    },
+
+    /**
+     * Check if cache exists
+     */
+    hasCache() {
+        return localStorage.getItem(this.CACHE_KEY) !== null;
     }
 };
 
@@ -1383,11 +1501,26 @@ function setupEventListeners() {
  * Initialize Application
  */
 function initApp() {
-    App.data = DataManager.createEmptyData();
+    // Try to load from cache first
+    const cacheLoaded = CacheManager.loadCache();
+    
+    if (!cacheLoaded) {
+        // No cache, start with empty data
+        App.data = DataManager.createEmptyData();
+    }
+    
     setupEventListeners();
     UIRenderer.renderAll();
     
-    console.log('Time Tracker initialized with dark mode, type persistence, and new charts!');
+    if (cacheLoaded) {
+        console.log('Time Tracker initialized with cached data');
+        // Show subtle notification that data was restored
+        setTimeout(() => {
+            UIRenderer.showNotification('Previous session restored from cache', 'success');
+        }, 500);
+    } else {
+        console.log('Time Tracker initialized - no cached data found');
+    }
 }
 
 // Start the app when DOM is ready
