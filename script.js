@@ -694,8 +694,7 @@ const ChartRenderer = {
                     backgroundColor: colors,
                     borderColor: '#1e293b',
                     borderWidth: 2
-                }
-            ]
+                }]
             },
             options: {
                 responsive: true,
@@ -1327,23 +1326,6 @@ const FilterManager = {
                 opt.classList.remove('selected');
             }
         });
-    },
-
-    /**
-     * Apply background colors to type options in filter dropdown
-     */
-    applyTypeColors() {
-        const select = document.getElementById('filterType');
-        const options = select.querySelectorAll('option[data-color]');
-        
-        options.forEach(option => {
-            const color = option.getAttribute('data-color');
-            if (color) {
-                option.style.backgroundColor = color;
-                option.style.color = 'white';
-                option.style.fontWeight = '500';
-            }
-        });
     }
 };
 
@@ -1494,8 +1476,7 @@ const CacheManager = {
                         const filters = JSON.parse(cachedFilters);
                         App.filters = filters;
                         
-                        // Update filter UI
-                        if (filters.typeId) document.getElementById('filterType').value = filters.typeId;
+                        // Update filter UI will be done after DOM is ready
                         if (filters.dateStart) document.getElementById('filterDateStart').value = filters.dateStart;
                         if (filters.dateEnd) document.getElementById('filterDateEnd').value = filters.dateEnd;
                     }
