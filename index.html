@@ -77,9 +77,20 @@
                 <div class="filters-container">
                     <div class="filter-group">
                         <label for="filterType">Filter by Type:</label>
-                        <select id="filterType" class="filter-select">
-                            <option value="">All Types</option>
-                        </select>
+                        <div class="custom-select-wrapper">
+                            <div id="filterType" class="custom-select" tabindex="0">
+                                <div class="custom-select-trigger">
+                                    <span class="selected-text">All Types</span>
+                                    <span class="select-arrow">▼</span>
+                                </div>
+                                <div class="custom-select-dropdown">
+                                    <div class="custom-option" data-value="">
+                                        <span class="option-text">All Types</span>
+                                    </div>
+                                    <!-- Type options will be dynamically inserted here -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="filter-group">
                         <label for="filterDateStart">From:</label>

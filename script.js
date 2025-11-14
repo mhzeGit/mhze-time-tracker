@@ -240,10 +240,6 @@ const TypeManager = {
     }
 };
 
-const test = () => {
-    console.log('test');
-};
-
 /**
  * Entry Management Module
  */
@@ -1256,9 +1252,24 @@ const FilterManager = {
         App.filters.dateStart = '';
         App.filters.dateEnd = '';
         
-        document.getElementById('filterType').value = '';
+        // Reset custom dropdown
+        const customSelect = document.getElementById('filterType');
+        const trigger = customSelect.querySelector('.selected-text');
+        trigger.textContent = 'All Types';
+        
+        // Clear date inputs
         document.getElementById('filterDateStart').value = '';
         document.getElementById('filterDateEnd').value = '';
+        
+        // Update selected state in dropdown
+        const dropdown = customSelect.querySelector('.custom-select-dropdown');
+        dropdown.querySelectorAll('.custom-option').forEach(opt => {
+            if (opt.dataset.value === '') {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
         
         CacheManager.saveCache(); // Update cache
         UIRenderer.renderAll();
@@ -1268,20 +1279,54 @@ const FilterManager = {
      * Update filter dropdown with types
      */
     updateFilterDropdown() {
-        const select = document.getElementById('filterType');
-        const currentValue = select.value;
+        const customSelect = document.getElementById('filterType');
+        const dropdown = customSelect.querySelector('.custom-select-dropdown');
+        const trigger = customSelect.querySelector('.selected-text');
+        const currentValue = App.filters.typeId;
         
-        select.innerHTML = '<option value="">All Types</option>' +
-            App.data.types.map(type => 
-                `<option value="${type.id}" data-color="${type.color}">${type.name}</option>`
-            ).join('');
+        // Clear existing options (keep "All Types")
+        dropdown.innerHTML = `
+            <div class="custom-option" data-value="">
+                <span class="option-text">All Types</span>
+            </div>
+        `;
         
-        if (currentValue && App.data.types.find(t => t.id === currentValue)) {
-            select.value = currentValue;
+        // Add type options with colored indicators
+        App.data.types.forEach(type => {
+            const option = document.createElement('div');
+            option.className = 'custom-option';
+            option.dataset.value = type.id;
+            
+            const typeName = UIRenderer.escapeHtml(type.name);
+            
+            option.innerHTML = `
+                <span class="option-color-dot" style="background-color: ${type.color};"></span>
+                <span class="option-text">${typeName}</span>
+            `;
+            
+            dropdown.appendChild(option);
+        });
+        
+        // Update trigger text based on current selection
+        if (currentValue) {
+            const selectedType = App.data.types.find(t => t.id === currentValue);
+            if (selectedType) {
+                trigger.textContent = selectedType.name;
+            } else {
+                trigger.textContent = 'All Types';
+            }
+        } else {
+            trigger.textContent = 'All Types';
         }
         
-        // Apply color styling to options
-        FilterManager.applyTypeColors();
+        // Update selected state
+        dropdown.querySelectorAll('.custom-option').forEach(opt => {
+            if (opt.dataset.value === currentValue) {
+                opt.classList.add('selected');
+            } else {
+                opt.classList.remove('selected');
+            }
+        });
     },
 
     /**
@@ -1511,9 +1556,56 @@ function setupEventListeners() {
     });
 
     // Filter controls
-    document.getElementById('filterType').addEventListener('change', (e) => {
-        App.filters.typeId = e.target.value;
+    const filterTypeSelect = document.getElementById('filterType');
+    const filterTrigger = filterTypeSelect.querySelector('.custom-select-trigger');
+    const filterDropdown = filterTypeSelect.querySelector('.custom-select-dropdown');
+    
+    // Toggle dropdown
+    filterTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        filterTypeSelect.classList.toggle('open');
+    });
+    
+    // Handle option selection
+    filterDropdown.addEventListener('click', (e) => {
+        const option = e.target.closest('.custom-option');
+        if (!option) return;
+        
+        const value = option.dataset.value;
+        const text = option.querySelector('.option-text').textContent;
+        
+        // Update selection
+        App.filters.typeId = value;
+        filterTrigger.querySelector('.selected-text').textContent = text;
+        
+        // Update selected class
+        filterDropdown.querySelectorAll('.custom-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        option.classList.add('selected');
+        
+        // Close dropdown
+        filterTypeSelect.classList.remove('open');
+        
+        // Apply filters
         FilterManager.applyFilters();
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!filterTypeSelect.contains(e.target)) {
+            filterTypeSelect.classList.remove('open');
+        }
+    });
+    
+    // Keyboard support
+    filterTypeSelect.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            filterTypeSelect.classList.toggle('open');
+        } else if (e.key === 'Escape') {
+            filterTypeSelect.classList.remove('open');
+        }
     });
 
     // Date filter controls with calendar picker enhancement
