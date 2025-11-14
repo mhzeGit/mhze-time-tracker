@@ -359,44 +359,114 @@ TimeTracker/
 - Time graph scrolls if needed
 - Tooltips work with tap
 
----
+### Best Practices
 
-## Quick Checklist
-
-Before you start:
-- [ ] Open index.html
-- [ ] Load sample data (or start fresh)
-- [ ] Check pie chart appears
-- [ ] Try view switcher (Day/Week/Month)
-- [ ] Add a test entry
-- [ ] Watch charts update
-- [ ] Save your data
-- [ ] Reload to verify types persist
-
-All working? You're ready!
+- Use shorter type names on mobile
+- Limit types to 5-6 for readability
+- Landscape mode for chart analysis
 
 ---
 
-## Next Steps
+## ?? Advanced Customization
 
-1. **Create your types** with custom colors
-2. **Add entries** from this week
-3. **Explore pie chart** - See distribution
-4. **Try all three views** - Day/Week/Month
-5. **Save your file** - Types preserved!
-6. **Reload tomorrow** - Types still there
+### Changing Chart Colors
+
+Edit `script.js` in `ChartRenderer`:
+
+```javascript
+// Chart grid color
+grid: { color: '#your-color' }
+
+// Chart text color
+ticks: { color: '#your-color' }
+```
+
+### Changing Type Badge Style
+
+Edit `style.css`:
+
+```css
+.entry-type-badge {
+    padding: 4px 10px;        /* Adjust size */
+    border-radius: 6px;       /* Adjust roundness */
+    font-size: 13px;          /* Adjust text size */
+}
+```
+
+### Chart Aspect Ratio
+
+Edit `script.js` in chart options:
+
+```javascript
+aspectRatio: 2,  // Change to 1.5, 2.5, etc.
+```
 
 ---
 
-## More Info
+## ?? Keyboard Shortcuts
 
-- **FEATURE-UPDATE.md** - Detailed technical guide
-- **README.md** - Complete documentation
-- **USER-GUIDE.md** - Full user manual
-- **sample-data.json** - Example with types
+While no built-in shortcuts exist, browser shortcuts work:
+
+- **Ctrl/Cmd + S**: Save page (may prompt download)
+- **Tab**: Navigate form fields
+- **Enter**: Submit form
+- **Esc**: Close modal
+- **Ctrl/Cmd + F**: Find in page
 
 ---
 
-**Enjoy your enhanced time tracker!**
+## ?? Data Migration
 
-Types are now permanent, charts are interactive, and insights are instant!
+### From Old Format
+
+**Old:**
+```json
+{
+  "entries": [{ "type": "Development" }]
+}
+```
+
+**New:**
+```json
+{
+  "types": [{ "id": "...", "name": "Development", "color": "#3b82f6" }],
+  "entries": [{ "typeId": "..." }]
+}
+```
+
+**Migration Steps:**
+1. Load old data file
+2. App creates default types
+3. Manually create types matching old type strings
+4. Edit each entry to select correct type
+5. Save new format
+
+---
+
+## ? Quick Checklist
+
+Before starting:
+- ? Open `index.html` in modern browser
+- ? Load sample data to explore features
+- ? Create your own types
+- ? Add a few test entries
+- ? Check charts display correctly
+- ? Save your data file
+
+Ready to track:
+- ? Types defined with colors
+- ? Understand how to add entries
+- ? Know how to read charts
+- ? Data file saved safely
+
+---
+
+## ?? Next Steps
+
+1. **Create your types** - Start with 3-5 categories
+2. **Add entries** - Track last week retroactively
+3. **Analyze charts** - Look for patterns
+4. **Adjust types** - Refine categories as needed
+5. **Save regularly** - Don't lose your data!
+
+**Happy tracking! ????**
