@@ -461,25 +461,37 @@ const Analytics = {
      */
     getTimeGraphData(view) {
         if (view === 'day') {
-            // All days with entries (not hourly breakdown)
-            return this.getAllDaysData();
+            // All days with entries (including gaps)
+            return this.getAllDaysDataWithGaps();
         } else if (view === 'week') {
-            // Group by weeks
-            return this.getAllWeeksData();
+            // Group by weeks (including empty weeks)
+            return this.getAllWeeksDataWithGaps();
         } else if (view === 'month') {
-            // Current month's days
-            return this.getCurrentMonthData();
+            // Current month's days (all days, not weeks)
+            return this.getCurrentMonthDataAllDays();
         }
     },
 
     /**
-     * Get all days that have entries
+     * Get all days from first to last entry (including days with 0 hours)
      */
-    getAllDaysData() {
+    getAllDaysDataWithGaps() {
         const dailyTotalsByType = this.getDailyTotalsByType();
         const dates = Object.keys(dailyTotalsByType).sort();
         
-        const data = dates.map(dateStr => {
+        if (dates.length === 0) return [];
+        
+        // Get first and last date
+        const firstDate = new Date(dates[0]);
+        const lastDate = new Date(dates[dates.length - 1]);
+        
+        const data = [];
+        const currentDate = new Date(firstDate);
+        
+        // Loop through all days from first to last
+        while (currentDate <= lastDate) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            
             const typeData = {};
             let total = 0;
             
@@ -489,24 +501,35 @@ const Analytics = {
                 total += minutes;
             });
             
-            return {
+            data.push({
                 date: dateStr,
                 total: total,
                 byType: typeData
-            };
-        });
+            });
+            
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
         
         return data;
     },
 
     /**
-     * Get all weeks that have entries
+     * Get all weeks from first to last entry (including weeks with 0 hours)
      */
-    getAllWeeksData() {
+    getAllWeeksDataWithGaps() {
         const weeklyTotalsByType = this.getWeeklyTotalsByType();
         const weeks = Object.keys(weeklyTotalsByType).sort();
         
-        const data = weeks.map(weekKey => {
+        if (weeks.length === 0) return [];
+        
+        // Parse first and last week
+        const firstWeek = weeks[0];
+        const lastWeek = weeks[weeks.length - 1];
+        
+        const data = [];
+        const allWeeks = this.getWeekRange(firstWeek, lastWeek);
+        
+        allWeeks.forEach(weekKey => {
             const typeData = {};
             let total = 0;
             
@@ -516,17 +539,40 @@ const Analytics = {
                 total += minutes;
             });
             
-            return {
+            data.push({
                 week: weekKey,
                 total: total,
                 byType: typeData
-            };
+            });
         });
         
         return data;
     },
 
-    getCurrentMonthData() {
+    /**
+     * Get range of weeks between two week identifiers
+     */
+    getWeekRange(firstWeek, lastWeek) {
+        const weeks = [];
+        const [firstYear, firstWeekNum] = firstWeek.split('-W').map(Number);
+        const [lastYear, lastWeekNum] = lastWeek.split('-W').map(Number);
+        
+        for (let year = firstYear; year <= lastYear; year++) {
+            const startWeek = (year === firstYear) ? firstWeekNum : 1;
+            const endWeek = (year === lastYear) ? lastWeekNum : 52;
+            
+            for (let week = startWeek; week <= endWeek; week++) {
+                weeks.push(`${year}-W${String(week).padStart(2, '0')}`);
+            }
+        }
+        
+        return weeks;
+    },
+
+    /**
+     * Get current month's ALL days (not just days with entries)
+     */
+    getCurrentMonthDataAllDays() {
         const today = new Date();
         const year = today.getFullYear();
         const month = today.getMonth();

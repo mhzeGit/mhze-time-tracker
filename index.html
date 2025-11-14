@@ -30,21 +30,12 @@
                     </span>
                     Save Data
                 </button>
-                <button id="addTaskBtn" class="btn btn-primary" title="Add new task">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </span>
-                    Add Task
-                </button>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Summary Section -->
+            <!-- 1. Summary Section -->
             <section class="summary-section">
                 <h2>Summary</h2>
                 <div class="summary-cards">
@@ -67,24 +58,26 @@
                 </div>
             </section>
 
-            <!-- Type Management Section -->
-            <section class="type-management">
-                <h2>Task Types</h2>
-                <div class="type-list" id="typeList">
-                    <!-- Types will be rendered here -->
+            <!-- 2. Time Entries Section -->
+            <section class="entries-section">
+                <div class="section-header">
+                    <h2>Time Entries</h2>
+                    <button id="addTaskBtn" class="btn btn-primary" title="Add new task">
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </span>
+                        Add Task
+                    </button>
                 </div>
-                <button id="addTypeBtn" class="btn btn-primary">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                    </span>
-                    Add Type
-                </button>
+                <div class="entries-list" id="entriesList">
+                    <p class="empty-state">No entries yet. Click "Add Task" to get started!</p>
+                </div>
             </section>
 
-            <!-- New Charts Section: Pie Chart and Time Graph -->
+            <!-- 3. Charts Section -->
             <section class="analytics-section">
                 <div class="chart-container chart-full">
                     <h3>Type Distribution</h3>
@@ -108,12 +101,21 @@
                 </div>
             </section>
 
-            <!-- Entries Section -->
-            <section class="entries-section">
-                <h2>Time Entries</h2>
-                <div class="entries-list" id="entriesList">
-                    <p class="empty-state">No entries yet. Click "Add Task" to get started!</p>
+            <!-- 4. Task Types Section -->
+            <section class="type-management">
+                <h2>Task Types</h2>
+                <div class="type-list" id="typeList">
+                    <!-- Types will be rendered here -->
                 </div>
+                <button id="addTypeBtn" class="btn btn-primary">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </span>
+                    Add Type
+                </button>
             </section>
         </main>
     </div>

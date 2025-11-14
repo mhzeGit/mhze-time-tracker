@@ -693,6 +693,18 @@ input[type="color"] {
     }
 }
 
+/* Section Header with Action Button */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;
