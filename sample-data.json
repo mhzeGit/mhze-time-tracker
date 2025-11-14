@@ -2,8 +2,23 @@
   "types": [
     {
       "id": "type-indie-game-dev-001",
-      "name": "Indie Game Dev",
+      "name": "Indie Dev",
       "color": "#8b5cf6"
+    },
+    {
+      "id": "b228470b-5119-4c44-97b0-029005e00b3b",
+      "name": "University Assignment",
+      "color": "#f73b3b"
+    },
+    {
+      "id": "4aa865ee-5780-46c4-b241-761a98d5ee75",
+      "name": "Freelance",
+      "color": "#2cba62"
+    },
+    {
+      "id": "3d548d3b-ecee-4257-9202-f5fbb219a445",
+      "name": "Video Games",
+      "color": "#cf206c"
     }
   ],
   "entries": [

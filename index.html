@@ -95,12 +95,12 @@
                 <!-- Entries Table -->
                 <div class="entries-table-container">
                     <div class="entries-table-header">
-                        <div class="entry-col entry-col-title">Title</div>
-                        <div class="entry-col entry-col-type">Type</div>
-                        <div class="entry-col entry-col-date">Date</div>
-                        <div class="entry-col entry-col-time">Start</div>
-                        <div class="entry-col entry-col-time">End</div>
-                        <div class="entry-col entry-col-duration">Duration</div>
+                        <div class="entry-col entry-col-title sortable" data-sort="title">Title</div>
+                        <div class="entry-col entry-col-type sortable" data-sort="type">Type</div>
+                        <div class="entry-col entry-col-date sortable" data-sort="date">Date</div>
+                        <div class="entry-col entry-col-time sortable" data-sort="start">Start</div>
+                        <div class="entry-col entry-col-time sortable" data-sort="end">End</div>
+                        <div class="entry-col entry-col-duration sortable" data-sort="duration">Duration</div>
                         <div class="entry-col entry-col-actions">Actions</div>
                     </div>
                     <div class="entries-table-body" id="entriesTableBody">
@@ -111,14 +111,14 @@
 
             <!-- 3. Charts Section -->
             <section class="analytics-section">
-                <div class="chart-container chart-full">
+                <div class="chart-container">
                     <h3>Type Distribution</h3>
                     <div class="chart-wrapper">
                         <canvas id="pieChart"></canvas>
                     </div>
                 </div>
                 
-                <div class="chart-container chart-full">
+                <div class="chart-container">
                     <div class="chart-header">
                         <h3>Time Graph</h3>
                         <div class="view-switcher">

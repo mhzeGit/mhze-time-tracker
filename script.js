@@ -3,7 +3,7 @@
  * A static web app for tracking time entries with analytics and stacked charts
  */
 
-// Main Application Object - Single source of truth
+ // Main Application Object - Single source of truth
 const App = {
     data: {
         entries: [],
@@ -248,10 +248,14 @@ const test = () => {
  * Entry Management Module
  */
 const EntryManager = {
-    addEntry(entry) {
+    addEntry(entry = {}) {
         const newEntry = {
             id: DataManager.generateUUID(),
-            ...entry,
+            title: entry.title || 'Untitled Entry',
+            typeId: entry.typeId || null,
+            date: entry.date || new Date().toISOString().split('T')[0],
+            startTime: entry.startTime || '00:00',
+            endTime: entry.endTime || '01:00',
             durationMinutes: this.calculateDuration(entry.startTime, entry.endTime)
         };
         
@@ -817,7 +821,7 @@ const ChartRenderer = {
         return {
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 2,
+            aspectRatio: 1.5, // Changed from 2 to 1.5 for a more square appearance
             plugins: {
                 legend: {
                     display: true,
@@ -931,15 +935,7 @@ const UIRenderer = {
                         </span>
                         Edit
                     </button>
-                    <button class="btn btn-danger btn-small delete-type-btn" data-id="${type.id}">
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                            </svg>
-                        </span>
-                        Delete
-                    </button>
+                    <button class="btn btn-danger btn-small delete-type-btn" data-id="${type.id}" title="Delete type">&times;</button>
                 </div>
             </div>
         `).join('');
@@ -979,6 +975,12 @@ const UIRenderer = {
             return;
         }
         
+        this.renderEntriesSorted(filteredEntries);
+    },
+
+    renderEntriesSorted(filteredEntries) {
+        const container = document.getElementById('entriesTableBody');
+        
         container.innerHTML = filteredEntries.map(entry => {
             const type = TypeManager.getTypeById(entry.typeId);
             const typeName = type ? type.name : 'Unknown';
@@ -997,7 +999,7 @@ const UIRenderer = {
                     <div class="entry-col entry-col-duration" data-label="Duration">${EntryManager.formatDuration(entry.durationMinutes)}</div>
                     <div class="entry-col entry-col-actions">
                         <button class="entry-action-btn edit-btn" data-id="${entry.id}">Edit</button>
-                        <button class="entry-action-btn delete-btn" data-id="${entry.id}">Del</button>
+                        <button class="entry-action-btn delete-btn" data-id="${entry.id}" title="Delete entry">&times;</button>
                     </div>
                 </div>
             `;
@@ -1271,11 +1273,117 @@ const FilterManager = {
         
         select.innerHTML = '<option value="">All Types</option>' +
             App.data.types.map(type => 
-                `<option value="${type.id}">${type.name}</option>`
+                `<option value="${type.id}" data-color="${type.color}">${type.name}</option>`
             ).join('');
         
         if (currentValue && App.data.types.find(t => t.id === currentValue)) {
             select.value = currentValue;
+        }
+        
+        // Apply color styling to options
+        FilterManager.applyTypeColors();
+    },
+
+    /**
+     * Apply background colors to type options in filter dropdown
+     */
+    applyTypeColors() {
+        const select = document.getElementById('filterType');
+        const options = select.querySelectorAll('option[data-color]');
+        
+        options.forEach(option => {
+            const color = option.getAttribute('data-color');
+            if (color) {
+                option.style.backgroundColor = color;
+                option.style.color = 'white';
+                option.style.fontWeight = '500';
+            }
+        });
+    }
+};
+
+/**
+ * Sorting Module
+ * Handles sorting of entries by different columns
+ */
+const SortManager = {
+    currentColumn: null,
+    currentDirection: 'desc', // 'asc' or 'desc'
+
+    sortEntries(column) {
+        // Toggle direction if clicking same column
+        if (this.currentColumn === column) {
+            this.currentDirection = this.currentDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.currentColumn = column;
+            this.currentDirection = 'desc'; // Default to descending for new column
+        }
+
+        // Get filtered entries
+        const filteredEntries = FilterManager.getFilteredEntries();
+
+        // Sort based on column
+        filteredEntries.sort((a, b) => {
+            let valueA, valueB;
+
+            switch(column) {
+                case 'title':
+                    valueA = a.title.toLowerCase();
+                    valueB = b.title.toLowerCase();
+                    break;
+                case 'type':
+                    const typeA = TypeManager.getTypeById(a.typeId);
+                    const typeB = TypeManager.getTypeById(b.typeId);
+                    valueA = typeA ? typeA.name.toLowerCase() : '';
+                    valueB = typeB ? typeB.name.toLowerCase() : '';
+                    break;
+                case 'date':
+                    valueA = new Date(a.date + ' ' + a.startTime);
+                    valueB = new Date(b.date + ' ' + b.startTime);
+                    break;
+                case 'start':
+                    valueA = a.startTime;
+                    valueB = b.startTime;
+                    break;
+                case 'end':
+                    valueA = a.endTime;
+                    valueB = b.endTime;
+                    break;
+                case 'duration':
+                    valueA = a.durationMinutes;
+                    valueB = b.durationMinutes;
+                    break;
+                default:
+                    return 0;
+            }
+
+            // Compare values
+            let comparison = 0;
+            if (valueA > valueB) comparison = 1;
+            if (valueA < valueB) comparison = -1;
+
+            // Apply direction
+            return this.currentDirection === 'asc' ? comparison : -comparison;
+        });
+
+        // Re-render with sorted data
+        UIRenderer.renderEntriesSorted(filteredEntries);
+        this.updateSortIndicators();
+    },
+
+    updateSortIndicators() {
+        // Remove all existing indicators
+        document.querySelectorAll('.sort-indicator').forEach(el => el.remove());
+
+        // Add indicator to current column
+        if (this.currentColumn) {
+            const header = document.querySelector(`[data-sort="${this.currentColumn}"]`);
+            if (header) {
+                const indicator = document.createElement('span');
+                indicator.className = 'sort-indicator';
+                indicator.textContent = this.currentDirection === 'asc' ? ' ?' : ' ?';
+                header.appendChild(indicator);
+            }
         }
     }
 };
@@ -1408,18 +1516,40 @@ function setupEventListeners() {
         FilterManager.applyFilters();
     });
 
-    document.getElementById('filterDateStart').addEventListener('change', (e) => {
+    // Date filter controls with calendar picker enhancement
+    const filterDateStart = document.getElementById('filterDateStart');
+    const filterDateEnd = document.getElementById('filterDateEnd');
+    
+    // Make clicking anywhere on the input open the calendar
+    filterDateStart.addEventListener('click', function(e) {
+        this.showPicker();
+    });
+    
+    filterDateEnd.addEventListener('click', function(e) {
+        this.showPicker();
+    });
+    
+    // Handle date changes
+    filterDateStart.addEventListener('change', (e) => {
         App.filters.dateStart = e.target.value;
         FilterManager.applyFilters();
     });
 
-    document.getElementById('filterDateEnd').addEventListener('change', (e) => {
+    filterDateEnd.addEventListener('change', (e) => {
         App.filters.dateEnd = e.target.value;
         FilterManager.applyFilters();
     });
 
     document.getElementById('clearFiltersBtn').addEventListener('click', () => {
         FilterManager.clearFilters();
+    });
+    
+    // Sortable headers
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-sort');
+            SortManager.sortEntries(column);
+        });
     });
     
     // Task modal controls
@@ -1439,6 +1569,12 @@ function setupEventListeners() {
     
     document.getElementById('taskForm').addEventListener('submit', (e) => {
         ModalManager.handleFormSubmit(e);
+    });
+    
+    // Task modal date input with calendar picker
+    const taskDateInput = document.getElementById('taskDate');
+    taskDateInput.addEventListener('click', function(e) {
+        this.showPicker();
     });
     
     document.getElementById('taskStartTime').addEventListener('change', () => {
