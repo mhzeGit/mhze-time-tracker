@@ -460,57 +460,26 @@ const Analytics = {
      * Get data for time graph based on view mode
      */
     getTimeGraphData(view) {
-        const today = new Date();
-        
         if (view === 'day') {
-            // 24 hours of today
-            return this.getTodayHourlyData();
+            // All days with entries (not hourly breakdown)
+            return this.getAllDaysData();
         } else if (view === 'week') {
-            // Last 7 days
-            return this.getLastNDaysData(7);
+            // Group by weeks
+            return this.getAllWeeksData();
         } else if (view === 'month') {
             // Current month's days
             return this.getCurrentMonthData();
         }
     },
 
-    getTodayHourlyData() {
-        const today = new Date().toISOString().split('T')[0];
-        const hourlyData = Array(24).fill(0).map((_, i) => ({ hour: i, total: 0, byType: {} }));
-        
-        App.data.entries.forEach(entry => {
-            if (entry.date === today) {
-                const [startHour] = entry.startTime.split(':').map(Number);
-                const [endHour] = entry.endTime.split(':').map(Number);
-                
-                // Distribute time across hours (simplified)
-                for (let h = startHour; h <= endHour && h < 24; h++) {
-                    if (!hourlyData[h].byType[entry.typeId]) {
-                        hourlyData[h].byType[entry.typeId] = 0;
-                    }
-                    
-                    // Simple equal distribution
-                    const hoursSpan = endHour - startHour || 1;
-                    const minutesPerHour = entry.durationMinutes / hoursSpan;
-                    hourlyData[h].byType[entry.typeId] += minutesPerHour;
-                    hourlyData[h].total += minutesPerHour;
-                }
-            }
-        });
-        
-        return hourlyData;
-    },
-
-    getLastNDaysData(n) {
+    /**
+     * Get all days that have entries
+     */
+    getAllDaysData() {
         const dailyTotalsByType = this.getDailyTotalsByType();
-        const data = [];
-        const today = new Date();
+        const dates = Object.keys(dailyTotalsByType).sort();
         
-        for (let i = n - 1; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const dateStr = date.toISOString().split('T')[0];
-            
+        const data = dates.map(dateStr => {
             const typeData = {};
             let total = 0;
             
@@ -520,12 +489,39 @@ const Analytics = {
                 total += minutes;
             });
             
-            data.push({
+            return {
                 date: dateStr,
                 total: total,
                 byType: typeData
+            };
+        });
+        
+        return data;
+    },
+
+    /**
+     * Get all weeks that have entries
+     */
+    getAllWeeksData() {
+        const weeklyTotalsByType = this.getWeeklyTotalsByType();
+        const weeks = Object.keys(weeklyTotalsByType).sort();
+        
+        const data = weeks.map(weekKey => {
+            const typeData = {};
+            let total = 0;
+            
+            App.data.types.forEach(type => {
+                const minutes = (weeklyTotalsByType[weekKey] && weeklyTotalsByType[weekKey][type.id]) || 0;
+                typeData[type.id] = minutes;
+                total += minutes;
             });
-        }
+            
+            return {
+                week: weekKey,
+                total: total,
+                byType: typeData
+            };
+        });
         
         return data;
     },
@@ -665,47 +661,61 @@ const ChartRenderer = {
         const view = App.currentTimeView;
         const data = Analytics.getTimeGraphData(view);
         
-        let labels, chartData, datasets;
+        if (!data || data.length === 0) {
+            // Show empty state
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
+            return;
+        }
+        
+        let labels, datasets;
         
         if (view === 'day') {
-            // 24 hours
-            labels = data.map(d => `${d.hour}:00`);
+            // Show dates (e.g., "15 Nov" or "11/15")
+            labels = data.map(d => {
+                const date = new Date(d.date + 'T00:00:00');
+                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+            });
             
             datasets = App.data.types.map(type => ({
                 label: type.name,
-                data: data.map(d => (d.byType[type.id] || 0) / 60),
+                data: data.map(d => (d.byType[type.id] || 0) / 60), // Convert to hours
                 backgroundColor: type.color,
                 borderColor: type.color,
                 borderWidth: 0
             }));
             
         } else if (view === 'week') {
-            // 7 days
-            labels = data.map(d => {
-                const date = new Date(d.date);
-                return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-            });
+            // Show week labels
+            labels = data.map(d => d.week);
             
             datasets = App.data.types.map(type => ({
                 label: type.name,
-                data: data.map(d => (d.byType[type.id] || 0) / 60),
+                data: data.map(d => (d.byType[type.id] || 0) / 60), // Convert to hours
                 backgroundColor: type.color,
                 borderColor: type.color,
                 borderWidth: 0
             }));
             
         } else if (view === 'month') {
-            // Days in month
+            // Show day numbers
             labels = data.map(d => d.day.toString());
             
             datasets = App.data.types.map(type => ({
                 label: type.name,
-                data: data.map(d => (d.byType[type.id] || 0) / 60),
+                data: data.map(d => (d.byType[type.id] || 0) / 60), // Convert to hours
                 backgroundColor: type.color,
                 borderColor: type.color,
                 borderWidth: 0
             }));
         }
+        
+        // Calculate max value for flexible Y-axis
+        const maxValue = Math.max(...data.map(d => d.total / 60)); // Convert to hours
+        const suggestedMax = Math.ceil(maxValue); // Round up to nearest hour
         
         App.charts.timeGraph = new Chart(ctx, {
             type: 'bar',
@@ -713,14 +723,14 @@ const ChartRenderer = {
                 labels: labels,
                 datasets: datasets
             },
-            options: this.getStackedBarOptions(view)
+            options: this.getStackedBarOptions(view, suggestedMax)
         });
     },
 
     /**
      * Get common stacked bar chart options
      */
-    getStackedBarOptions(view) {
+    getStackedBarOptions(view, suggestedMax) {
         return {
             responsive: true,
             maintainAspectRatio: true,
@@ -763,13 +773,14 @@ const ChartRenderer = {
                     ticks: {
                         color: '#94a3b8',
                         font: { size: view === 'month' ? 9 : 11 },
-                        maxRotation: view === 'month' ? 90 : 45,
-                        minRotation: view === 'month' ? 45 : 0
+                        maxRotation: view === 'day' ? 45 : (view === 'month' ? 90 : 0),
+                        minRotation: view === 'day' ? 0 : (view === 'month' ? 45 : 0)
                     }
                 },
                 y: {
                     stacked: true,
                     beginAtZero: true,
+                    suggestedMax: suggestedMax > 0 ? suggestedMax : 1,
                     grid: {
                         color: '#334155',
                         drawBorder: false
@@ -777,8 +788,9 @@ const ChartRenderer = {
                     ticks: {
                         color: '#94a3b8',
                         font: { size: 11 },
+                        stepSize: 1, // Force whole hours
                         callback: function(value) {
-                            return value + 'h';
+                            return Math.round(value) + 'h';
                         }
                     }
                 }
