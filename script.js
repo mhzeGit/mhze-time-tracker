@@ -9,6 +9,11 @@ const App = {
         entries: [],
         types: []
     },
+    filters: {
+        typeId: '',
+        dateStart: '',
+        dateEnd: ''
+    },
     currentFileName: null,
     currentFileHandle: null,
     editingId: null,
@@ -223,6 +228,10 @@ const TypeManager = {
     }
 };
 
+const test = () => {
+    console.log('test');
+};
+
 /**
  * Entry Management Module
  */
@@ -299,6 +308,13 @@ const EntryManager = {
  * Analytics Module
  */
 const Analytics = {
+    /**
+     * Get entries to analyze (filtered or all)
+     */
+    getEntriesToAnalyze() {
+        return FilterManager.getFilteredEntries();
+    },
+
     getDailyAverage() {
         const dailyTotals = this.getDailyTotals();
         const days = Object.keys(dailyTotals).length;
@@ -321,8 +337,9 @@ const Analytics = {
 
     getDailyTotals() {
         const totals = {};
+        const entries = this.getEntriesToAnalyze();
         
-        App.data.entries.forEach(entry => {
+        entries.forEach(entry => {
             if (!totals[entry.date]) {
                 totals[entry.date] = 0;
             }
@@ -334,8 +351,9 @@ const Analytics = {
 
     getDailyTotalsByType() {
         const totals = {};
+        const entries = this.getEntriesToAnalyze();
         
-        App.data.entries.forEach(entry => {
+        entries.forEach(entry => {
             if (!totals[entry.date]) {
                 totals[entry.date] = {};
             }
@@ -350,8 +368,9 @@ const Analytics = {
 
     getWeeklyTotals() {
         const totals = {};
+        const entries = this.getEntriesToAnalyze();
         
-        App.data.entries.forEach(entry => {
+        entries.forEach(entry => {
             const weekKey = this.getWeekKey(entry.date);
             if (!totals[weekKey]) {
                 totals[weekKey] = 0;
@@ -364,8 +383,9 @@ const Analytics = {
 
     getWeeklyTotalsByType() {
         const totals = {};
+        const entries = this.getEntriesToAnalyze();
         
-        App.data.entries.forEach(entry => {
+        entries.forEach(entry => {
             const weekKey = this.getWeekKey(entry.date);
             if (!totals[weekKey]) {
                 totals[weekKey] = {};
@@ -389,7 +409,8 @@ const Analytics = {
     },
 
     getTotalTime() {
-        return App.data.entries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
+        const entries = this.getEntriesToAnalyze();
+        return entries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
     },
 
     /**
@@ -397,8 +418,9 @@ const Analytics = {
      */
     getTimePerType() {
         const totals = {};
+        const entries = this.getEntriesToAnalyze();
         
-        App.data.entries.forEach(entry => {
+        entries.forEach(entry => {
             if (!totals[entry.typeId]) {
                 totals[entry.typeId] = 0;
             }
@@ -857,6 +879,8 @@ const UIRenderer = {
     },
 
     renderSummary() {
+        const filteredEntries = FilterManager.getFilteredEntries();
+        
         document.getElementById('dailyAverage').textContent = 
             EntryManager.formatDuration(Analytics.getDailyAverage());
         
@@ -864,7 +888,7 @@ const UIRenderer = {
             EntryManager.formatDuration(Analytics.getWeeklyAverage());
         
         document.getElementById('totalEntries').textContent = 
-            App.data.entries.length;
+            filteredEntries.length;
         
         document.getElementById('totalTime').textContent = 
             EntryManager.formatDuration(Analytics.getTotalTime());
@@ -914,6 +938,7 @@ const UIRenderer = {
         });
         
         this.updateTypeDropdown();
+        FilterManager.updateFilterDropdown();
     },
 
     updateTypeDropdown() {
@@ -931,64 +956,33 @@ const UIRenderer = {
     },
 
     renderEntries() {
-        const container = document.getElementById('entriesList');
+        const container = document.getElementById('entriesTableBody');
+        const filteredEntries = FilterManager.getFilteredEntries();
         
-        if (App.data.entries.length === 0) {
-            container.innerHTML = '<p class="empty-state">No entries yet. Click "Add Task" to get started!</p>';
+        if (filteredEntries.length === 0) {
+            container.innerHTML = '<p class="empty-state">No entries found. Try adjusting filters or add a new task.</p>';
             return;
         }
         
-        container.innerHTML = App.data.entries.map(entry => {
+        container.innerHTML = filteredEntries.map(entry => {
             const type = TypeManager.getTypeById(entry.typeId);
             const typeName = type ? type.name : 'Unknown';
             const typeColor = type ? type.color : '#64748b';
             
             return `
-                <div class="entry-card" data-id="${entry.id}">
-                    <div class="entry-info">
-                        <div class="entry-field">
-                            <div class="entry-label">Title</div>
-                            <div class="entry-value entry-title">${this.escapeHtml(entry.title)}</div>
-                        </div>
-                        <div class="entry-field">
-                            <div class="entry-label">Type</div>
-                            <div class="entry-type-badge" style="background-color: ${typeColor}22; color: ${typeColor}; border: 1px solid ${typeColor}55;">
-                                <span class="entry-type-color" style="background-color: ${typeColor};"></span>
-                                ${this.escapeHtml(typeName)}
-                            </div>
-                        </div>
-                        <div class="entry-field">
-                            <div class="entry-label">Date</div>
-                            <div class="entry-value">${this.formatDate(entry.date)}</div>
-                        </div>
-                        <div class="entry-field">
-                            <div class="entry-label">Time</div>
-                            <div class="entry-value">${entry.startTime} - ${entry.endTime}</div>
-                        </div>
-                        <div class="entry-field">
-                            <div class="entry-label">Duration</div>
-                            <div class="entry-value entry-duration">${EntryManager.formatDuration(entry.durationMinutes)}</div>
-                        </div>
+                <div class="entry-row" data-id="${entry.id}">
+                    <div class="entry-col entry-col-title" data-label="Title">${this.escapeHtml(entry.title)}</div>
+                    <div class="entry-col entry-col-type" data-label="Type">
+                        <span class="entry-type-dot" style="background-color: ${typeColor};"></span>
+                        ${this.escapeHtml(typeName)}
                     </div>
-                    <div class="entry-actions">
-                        <button class="btn btn-secondary btn-small edit-btn" data-id="${entry.id}">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                </svg>
-                            </span>
-                            Edit
-                        </button>
-                        <button class="btn btn-danger btn-small delete-btn" data-id="${entry.id}">
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"/>
-                                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                                </svg>
-                            </span>
-                            Delete
-                        </button>
+                    <div class="entry-col entry-col-date" data-label="Date">${this.formatShortDate(entry.date)}</div>
+                    <div class="entry-col entry-col-time" data-label="Start">${entry.startTime}</div>
+                    <div class="entry-col entry-col-time" data-label="End">${entry.endTime}</div>
+                    <div class="entry-col entry-col-duration" data-label="Duration">${EntryManager.formatDuration(entry.durationMinutes)}</div>
+                    <div class="entry-col entry-col-actions">
+                        <button class="entry-action-btn edit-btn" data-id="${entry.id}">Edit</button>
+                        <button class="entry-action-btn delete-btn" data-id="${entry.id}">Del</button>
                     </div>
                 </div>
             `;
@@ -1014,6 +1008,15 @@ const UIRenderer = {
             year: 'numeric', 
             month: 'short', 
             day: 'numeric'
+        });
+    },
+
+    formatShortDate(dateString) {
+        const date = new Date(dateString + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { 
+            month: '2-digit', 
+            day: '2-digit',
+            year: '2-digit'
         });
     },
 
@@ -1193,6 +1196,74 @@ const TypeModalManager = {
 };
 
 /**
+ * Filter Module
+ * Handles filtering of entries by type and date range
+ */
+const FilterManager = {
+    /**
+     * Get filtered entries based on current filter state
+     */
+    getFilteredEntries() {
+        let filtered = [...App.data.entries];
+        
+        // Filter by type
+        if (App.filters.typeId) {
+            filtered = filtered.filter(e => e.typeId === App.filters.typeId);
+        }
+        
+        // Filter by date range
+        if (App.filters.dateStart) {
+            filtered = filtered.filter(e => e.date >= App.filters.dateStart);
+        }
+        
+        if (App.filters.dateEnd) {
+            filtered = filtered.filter(e => e.date <= App.filters.dateEnd);
+        }
+        
+        return filtered;
+    },
+
+    /**
+     * Apply filter and update UI
+     */
+    applyFilters() {
+        UIRenderer.renderAll();
+    },
+
+    /**
+     * Clear all filters
+     */
+    clearFilters() {
+        App.filters.typeId = '';
+        App.filters.dateStart = '';
+        App.filters.dateEnd = '';
+        
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterDateStart').value = '';
+        document.getElementById('filterDateEnd').value = '';
+        
+        UIRenderer.renderAll();
+    },
+
+    /**
+     * Update filter dropdown with types
+     */
+    updateFilterDropdown() {
+        const select = document.getElementById('filterType');
+        const currentValue = select.value;
+        
+        select.innerHTML = '<option value="">All Types</option>' +
+            App.data.types.map(type => 
+                `<option value="${type.id}">${type.name}</option>`
+            ).join('');
+        
+        if (currentValue && App.data.types.find(t => t.id === currentValue)) {
+            select.value = currentValue;
+        }
+    }
+};
+
+/**
  * Event Listeners Setup
  */
 function setupEventListeners() {
@@ -1211,6 +1282,26 @@ function setupEventListeners() {
     
     document.getElementById('addTypeBtn').addEventListener('click', () => {
         TypeModalManager.openAddModal();
+    });
+
+    // Filter controls
+    document.getElementById('filterType').addEventListener('change', (e) => {
+        App.filters.typeId = e.target.value;
+        FilterManager.applyFilters();
+    });
+
+    document.getElementById('filterDateStart').addEventListener('change', (e) => {
+        App.filters.dateStart = e.target.value;
+        FilterManager.applyFilters();
+    });
+
+    document.getElementById('filterDateEnd').addEventListener('change', (e) => {
+        App.filters.dateEnd = e.target.value;
+        FilterManager.applyFilters();
+    });
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        FilterManager.clearFilters();
     });
     
     // Task modal controls

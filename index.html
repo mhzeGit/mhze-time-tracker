@@ -72,8 +72,40 @@
                         Add Task
                     </button>
                 </div>
-                <div class="entries-list" id="entriesList">
-                    <p class="empty-state">No entries yet. Click "Add Task" to get started!</p>
+
+                <!-- Filters -->
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="filterType">Filter by Type:</label>
+                        <select id="filterType" class="filter-select">
+                            <option value="">All Types</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDateStart">From:</label>
+                        <input type="date" id="filterDateStart" class="filter-date">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDateEnd">To:</label>
+                        <input type="date" id="filterDateEnd" class="filter-date">
+                    </div>
+                    <button id="clearFiltersBtn" class="btn btn-secondary btn-small">Clear Filters</button>
+                </div>
+
+                <!-- Entries Table -->
+                <div class="entries-table-container">
+                    <div class="entries-table-header">
+                        <div class="entry-col entry-col-title">Title</div>
+                        <div class="entry-col entry-col-type">Type</div>
+                        <div class="entry-col entry-col-date">Date</div>
+                        <div class="entry-col entry-col-time">Start</div>
+                        <div class="entry-col entry-col-time">End</div>
+                        <div class="entry-col entry-col-duration">Duration</div>
+                        <div class="entry-col entry-col-actions">Actions</div>
+                    </div>
+                    <div class="entries-table-body" id="entriesTableBody">
+                        <p class="empty-state">No entries yet. Click "Add Task" to get started!</p>
+                    </div>
                 </div>
             </section>
 
