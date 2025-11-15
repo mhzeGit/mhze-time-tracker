@@ -86,7 +86,7 @@ body {
 .top-bar {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-default);
-    padding: 16px 24px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -105,13 +105,51 @@ body {
     gap: 12px;
 }
 
-/* === MAIN CONTENT === */
+/* === MAIN CONTENT GRID === */
 .main-content {
     flex: 1;
-    padding: 24px;
-    max-width: 1400px;
+    padding: 20px;
+    max-width: 1600px;
     margin: 0 auto;
     width: 100%;
+    display: grid;
+    grid-template-columns: 350px 1fr 1fr;
+    grid-template-rows: auto minmax(600px, auto) minmax(400px, auto);
+    gap: 20px;
+    grid-template-areas:
+        "filters filters filters"
+        "sidebar main-top main-top"
+        "types chart-left chart-right";
+    align-items: stretch;
+}
+
+.filters-section {
+    grid-area: filters;
+}
+
+.summary-section {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+}
+
+.entries-section {
+    grid-area: main-top;
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-section {
+    grid-area: chart-left / chart-left / chart-right / chart-right;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.type-management {
+    grid-area: types;
+    display: flex;
+    flex-direction: column;
 }
 
 /* === BUTTONS === */
@@ -121,7 +159,7 @@ body {
     gap: 8px;
     padding: 10px 18px;
     border: none; /* Remove all borders for consistency */
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--button-bg);
     color: var(--text-primary);
     font-size: 14px;
@@ -150,7 +188,7 @@ body {
 }
 
 .btn-secondary {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     color: var(--text-primary);
 }
 
@@ -188,15 +226,17 @@ section {
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 20px;
+    padding: 20px;
+    margin-bottom: 0;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 section h2 {
     font-size: 18px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     letter-spacing: -0.01em;
 }
 
@@ -205,7 +245,7 @@ section h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .section-header h2 {
@@ -213,16 +253,21 @@ section h2 {
 }
 
 /* === SUMMARY CARDS === */
+.summary-section {
+    position: relative;
+    align-self: start;
+}
+
 .summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 16px;
 }
 
 .summary-card {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 20px;
     transition: border-color 0.2s;
 }
@@ -253,7 +298,7 @@ section h2 {
     border: 1px solid var(--border-subtle);
     border-radius: 8px;
     padding: 0;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     overflow: visible;
 }
 
@@ -265,14 +310,14 @@ section h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px;
+    padding: 16px 20px;
     cursor: pointer;
     user-select: none;
     transition: background 0.2s;
 }
 
 .filters-header:hover {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
 }
 
 .filters-header h2 {
@@ -332,7 +377,7 @@ section h2 {
     flex-wrap: wrap;
     gap: 15px;
     align-items: flex-end;
-    padding: 0 24px 20px 24px;
+    padding: 0 20px 16px 20px;
     background: var(--bg-secondary);
     border-top: 1px solid var(--border-subtle);
     max-height: 500px;
@@ -344,7 +389,7 @@ section h2 {
 .filters-section.collapsed .filters-container {
     max-height: 0;
     opacity: 0;
-    padding: 0 24px;
+    padding: 0 20px;
     overflow: hidden;
 }
 
@@ -367,7 +412,7 @@ section h2 {
     padding: 9px 12px;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-size: 14px;
     font-family: inherit;
@@ -432,7 +477,7 @@ section h2 {
     padding: 9px 12px;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-size: 14px;
     transition: border-color 0.2s, box-shadow 0.2s;
@@ -468,9 +513,9 @@ section h2 {
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-default);
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: var(--shadow-md);
     max-height: 300px;
     overflow-y: auto;
@@ -533,7 +578,7 @@ section h2 {
 /* === ENTRIES TABLE === */
 .entries-table-container {
     background: var(--bg-secondary); /* Darker background for better card contrast */
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid var(--border-subtle);
     overflow: hidden;
 }
@@ -625,7 +670,7 @@ section h2 {
     gap: 0;
     padding: 12px 16px; /* Decreased padding to make cards smaller */
     margin: 0 4px 4px 4px; /* Added left/right margin to match bottom margin */
-    background: var(--bg-tertiary); /* Lighter cards against darker background */
+    background: var(--bg-secondary); /* Lighter cards against darker background */
     border-bottom: 1px solid var(--border-subtle);
     border-radius: 4px; /* Add rounded corners to cards */
     transition: background 0.15s;
@@ -812,33 +857,28 @@ section h2 {
     grid-template-columns: 1fr 2fr;
     gap: 20px;
     max-width: 100%;
-    margin: 0 auto 24px auto; /* Add bottom margin */
+    margin: 0;
     padding: 0;
     background: transparent;
     border: none;
 }
 
 .chart-container {
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
-    padding: 24px; /* Increased from 20px for better spacing */
+    border-radius: 8px;
+    padding: 20px; /* Increased from 20px for better spacing */
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center;`n    height: 100%;`n    box-sizing: border-box;
 }
 
-.chart-container h3 {
-    font-size: 16px;
+.chart-container h3 {`n    font-size: 18px;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 16px;
     width: 100%;
     text-align: left;
-}
-
-.chart-full {
-    /* Remove the full-width override for horizontal layout */
 }
 
 .chart-header {
@@ -862,23 +902,68 @@ section h2 {
     align-items: center;
 }
 
-/* Make pie chart wrapper more compact and centered */
-.chart-container:nth-child(1) .chart-wrapper {
-    max-width: 350px;
+/* === CHARTS === */
+.analytics-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
 }
 
-/* Make time graph wrapper taller and more square-ish */
-.chart-container:nth-child(2) .chart-wrapper {
-    height: 400px;
+.chart-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 20px; /* Increased from 20px for better spacing */
+    display: flex;
+    flex-direction: column;
+    align-items: center;`n    height: 100%;`n    box-sizing: border-box;
 }
 
-/* === VIEW SWITCHER === */
+.chart-container h3 {`n    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    width: 100%;
+    text-align: left;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.chart-header h3 {
+    margin: 0;
+}
+
+.chart-wrapper {
+    height: 300px;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* === TYPE MANAGEMENT === */
+.type-management {
+    max-width: 100%;
+    margin-top: 0;
+}
 .view-switcher {
     display: flex;
     gap: 4px;
     background: var(--bg-primary);
     padding: 4px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid var(--border-subtle);
 }
 
@@ -907,15 +992,39 @@ section h2 {
 
 /* === TYPE MANAGEMENT === */
 .type-management {
-    max-width: 600px; /* Limit width to make it smaller and less prominent */
-    margin-top: 24px; /* Add top margin for spacing from charts */
+    max-width: 100%;
+    margin-top: 0;
+    overflow: hidden;
 }
 
 .type-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+}
+
+/* Custom scrollbar for type list */
+.type-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.type-list::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 3px;
+}
+
+.type-list::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+}
+
+.type-list::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
 }
 
 .type-item {
@@ -923,9 +1032,9 @@ section h2 {
     align-items: center;
     gap: 12px;
     padding: 14px;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: 8px;
     transition: border-color 0.2s;
 }
 
@@ -1022,11 +1131,11 @@ section h2 {
 
 /* === FORMS === */
 form {
-    padding: 24px;
+    padding: 20px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
@@ -1045,7 +1154,7 @@ form {
     padding: 10px 12px;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--text-primary);
     font-size: 14px;
     font-family: inherit;
@@ -1076,9 +1185,9 @@ form {
 
 .duration-display {
     padding: 10px 12px;
-    background: var(--bg-tertiary);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--accent-primary);
     font-weight: 600;
     font-size: 16px;
@@ -1105,7 +1214,7 @@ form {
     width: 60px;
     height: 40px;
     border: 1px solid var(--input-border);
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     background: var(--input-bg);
 }
@@ -1122,12 +1231,40 @@ form {
 .color-preview {
     width: 40px;
     height: 40px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid var(--border-subtle);
 }
 
 /* === RESPONSIVE === */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 300px 1fr;
+    }
+}
+
 @media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "filters"
+            "sidebar"
+            "main-top"
+            "main-middle"
+            "main-bottom";
+    }
+    
+    .summary-section {
+        position: relative;
+        top: 0;
+        max-height: none;
+    }
+    
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
     .analytics-section {
         grid-template-columns: 1fr;
     }
@@ -1206,6 +1343,10 @@ form {
         min-width: 100%;
     }
 
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
     .entries-table-header {
         display: none;
     }
@@ -1215,7 +1356,7 @@ form {
         flex-direction: column;
         gap: 10px;
         padding: 18px; /* Increased from 15px for better mobile spacing */
-        border-radius: 6px;
+        border-radius: 8px;
         margin-bottom: 12px; /* Increased from 10px for more separation */
         background: var(--bg-primary);
     }
@@ -1258,10 +1399,6 @@ form {
 
     .entries-table-body {
         max-height: 400px;
-    }
-    
-    .summary-cards {
-        grid-template-columns: 1fr;
     }
     
     .form-row {
