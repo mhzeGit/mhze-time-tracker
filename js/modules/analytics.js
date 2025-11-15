@@ -158,7 +158,7 @@ const Analytics = {
         } else if (view === 'week') {
             return this.getAllWeeksDataWithGaps();
         } else if (view === 'month') {
-            return this.getCurrentMonthDataAllDays();
+            return this.getAllMonthsDataWithGaps();
         }
     },
 
@@ -257,39 +257,89 @@ const Analytics = {
     },
 
     /**
-     * Get current month's ALL days (not just days with entries)
+     * Get monthly totals by type
      */
-    getCurrentMonthDataAllDays() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
-        const dailyTotalsByType = this.getDailyTotalsByType();
+    getMonthlyTotalsByType() {
+        const totals = {};
+        const entries = this.getEntriesToAnalyze();
+
+        entries.forEach(entry => {
+            const monthKey = this.getMonthKey(entry.date);
+            if (!totals[monthKey]) {
+                totals[monthKey] = {};
+            }
+            if (!totals[monthKey][entry.typeId]) {
+                totals[monthKey][entry.typeId] = 0;
+            }
+            totals[monthKey][entry.typeId] += entry.durationMinutes;
+        });
+
+        return totals;
+    },
+
+    /**
+     * Get month key from date (e.g., "2024-01" for January 2024)
+     */
+    getMonthKey(dateString) {
+        const date = new Date(dateString + 'T00:00:00');
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    },
+
+    /**
+     * Get all months from first to last entry (including months with 0 hours)
+     */
+    getAllMonthsDataWithGaps() {
+        const monthlyTotalsByType = this.getMonthlyTotalsByType();
+        const months = Object.keys(monthlyTotalsByType).sort();
+
+        if (months.length === 0) return [];
+
+        const firstMonth = months[0];
+        const lastMonth = months[months.length - 1];
+
         const data = [];
-        
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const dateStr = date.toISOString().split('T')[0];
-            
+        const allMonths = this.getMonthRange(firstMonth, lastMonth);
+
+        allMonths.forEach(monthKey => {
             const typeData = {};
             let total = 0;
-            
+
             App.data.types.forEach(type => {
-                const minutes = (dailyTotalsByType[dateStr] && dailyTotalsByType[dateStr][type.id]) || 0;
+                const minutes = (monthlyTotalsByType[monthKey] && monthlyTotalsByType[monthKey][type.id]) || 0;
                 typeData[type.id] = minutes;
                 total += minutes;
             });
-            
+
             data.push({
-                date: dateStr,
-                day: day,
+                month: monthKey,
                 total: total,
                 byType: typeData
             });
-        }
-        
+        });
+
         return data;
+    },
+
+    /**
+     * Get range of months between two month identifiers
+     */
+    getMonthRange(firstMonth, lastMonth) {
+        const months = [];
+        const [firstYear, firstMonthNum] = firstMonth.split('-').map(Number);
+        const [lastYear, lastMonthNum] = lastMonth.split('-').map(Number);
+
+        for (let year = firstYear; year <= lastYear; year++) {
+            const startMonth = (year === firstYear) ? firstMonthNum : 1;
+            const endMonth = (year === lastYear) ? lastMonthNum : 12;
+
+            for (let month = startMonth; month <= endMonth; month++) {
+                months.push(`${year}-${String(month).padStart(2, '0')}`);
+            }
+        }
+
+        return months;
     }
 };
 

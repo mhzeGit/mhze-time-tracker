@@ -8,12 +8,36 @@ const EventListeners = {
      */
     setup() {
         this.setupTopBarButtons();
+        this.setupFilterToggle();
         this.setupFilterControls();
         this.setupSortableHeaders();
         this.setupTaskModal();
         this.setupTypeModal();
         this.setupViewSwitcher();
         this.setupWindowResize();
+    },
+
+    /**
+     * Setup filter section toggle
+     */
+    setupFilterToggle() {
+        const filtersHeader = document.getElementById('filtersHeader');
+        const filtersSection = filtersHeader.closest('.filters-section');
+        const filtersToggleBtn = document.getElementById('filtersToggleBtn');
+
+        // Initialize as collapsed
+        filtersSection.classList.add('collapsed');
+
+        // Toggle on header click
+        filtersHeader.addEventListener('click', () => {
+            filtersSection.classList.toggle('collapsed');
+        });
+
+        // Prevent toggle when clicking inside the container (when expanded)
+        const filtersContainer = document.getElementById('filtersContainer');
+        filtersContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
     },
 
     /**

@@ -58,23 +58,19 @@
                 </div>
             </section>
 
-            <!-- 2. Time Entries Section -->
-            <section class="entries-section">
-                <div class="section-header">
-                    <h2>Time Entries</h2>
-                    <button id="addTaskBtn" class="btn btn-primary" title="Add new task">
-                        <span class="icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                        </span>
-                        Add Task
+            <!-- 2. Filters Section -->
+            <section class="filters-section">
+                <div class="filters-header" id="filtersHeader">
+                    <h2>
+                        Filters
+                        <span class="filters-active-badge" id="filtersActiveBadge" style="display: none;">0</span>
+                    </h2>
+                    <button class="filters-toggle-btn" id="filtersToggleBtn" title="Toggle filters">
+                        <span class="toggle-icon">▼</span>
                     </button>
                 </div>
-
-                <!-- Filters -->
-                <div class="filters-container">
+                
+                <div class="filters-container" id="filtersContainer">
                     <div class="filter-group">
                         <label for="filterType">Filter by Type:</label>
                         <div class="custom-select-wrapper">
@@ -102,6 +98,22 @@
                     </div>
                     <button id="clearFiltersBtn" class="btn btn-secondary btn-small">Clear Filters</button>
                 </div>
+            </section>
+
+            <!-- 3. Time Entries Section -->
+            <section class="entries-section">
+                <div class="section-header">
+                    <h2>Time Entries</h2>
+                    <button id="addTaskBtn" class="btn btn-primary" title="Add new task">
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </span>
+                        Add Task
+                    </button>
+                </div>
 
                 <!-- Entries Table -->
                 <div class="entries-table-container">
@@ -120,7 +132,7 @@
                 </div>
             </section>
 
-            <!-- 3. Charts Section -->
+            <!-- 4. Charts Section -->
             <section class="analytics-section">
                 <div class="chart-container">
                     <h3>Type Distribution</h3>
@@ -144,7 +156,7 @@
                 </div>
             </section>
 
-            <!-- 4. Task Types Section -->
+            <!-- 5. Task Types Section -->
             <section class="type-management">
                 <h2>Task Types</h2>
                 <div class="type-list" id="typeList">

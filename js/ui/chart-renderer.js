@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Chart Rendering Module
  * Handles rendering of pie chart and time graph using Chart.js
  */
@@ -9,14 +9,14 @@ const ChartRenderer = {
     renderPieChart() {
         const canvas = document.getElementById('pieChart');
         const ctx = canvas.getContext('2d');
-        
+
         if (App.charts.pie) {
             App.charts.pie.destroy();
         }
-        
+
         const timePerType = Analytics.getTimePerType();
         const totalMinutes = Object.values(timePerType).reduce((sum, m) => sum + m, 0);
-        
+
         if (totalMinutes === 0) {
             // Show empty state
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -26,11 +26,11 @@ const ChartRenderer = {
             ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
             return;
         }
-        
+
         const labels = [];
         const data = [];
         const colors = [];
-        
+
         App.data.types.forEach(type => {
             const minutes = timePerType[type.id] || 0;
             if (minutes > 0) {
@@ -40,7 +40,7 @@ const ChartRenderer = {
                 colors.push(type.color);
             }
         });
-        
+
         App.charts.pie = new Chart(ctx, {
             type: 'pie',
             data: {
@@ -91,14 +91,14 @@ const ChartRenderer = {
     renderTimeGraph() {
         const canvas = document.getElementById('timeGraph');
         const ctx = canvas.getContext('2d');
-        
+
         if (App.charts.timeGraph) {
             App.charts.timeGraph.destroy();
         }
-        
+
         const view = App.currentTimeView;
         const data = Analytics.getTimeGraphData(view);
-        
+
         if (!data || data.length === 0) {
             // Show empty state
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -108,15 +108,15 @@ const ChartRenderer = {
             ctx.fillText('No data available', canvas.width / 2, canvas.height / 2);
             return;
         }
-        
+
         let labels, datasets;
-        
+
         if (view === 'day') {
             labels = data.map(d => {
                 const date = new Date(d.date + 'T00:00:00');
                 return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
             });
-            
+
             datasets = App.data.types.map(type => ({
                 label: type.name,
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
@@ -124,10 +124,10 @@ const ChartRenderer = {
                 borderColor: type.color,
                 borderWidth: 0
             }));
-            
+
         } else if (view === 'week') {
             labels = data.map(d => d.week);
-            
+
             datasets = App.data.types.map(type => ({
                 label: type.name,
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
@@ -135,10 +135,14 @@ const ChartRenderer = {
                 borderColor: type.color,
                 borderWidth: 0
             }));
-            
+
         } else if (view === 'month') {
-            labels = data.map(d => d.day.toString());
-            
+            labels = data.map(d => {
+                const [year, month] = d.month.split('-');
+                const date = new Date(year, month - 1);
+                return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+            });
+
             datasets = App.data.types.map(type => ({
                 label: type.name,
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
@@ -147,10 +151,10 @@ const ChartRenderer = {
                 borderWidth: 0
             }));
         }
-        
+
         const maxValue = Math.max(...data.map(d => d.total / 60));
         const suggestedMax = Math.ceil(maxValue);
-        
+
         App.charts.timeGraph = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -206,9 +210,9 @@ const ChartRenderer = {
                     },
                     ticks: {
                         color: '#94a3b8',
-                        font: { size: view === 'month' ? 9 : 11 },
-                        maxRotation: view === 'day' ? 45 : (view === 'month' ? 90 : 0),
-                        minRotation: view === 'day' ? 0 : (view === 'month' ? 45 : 0)
+                        font: { size: view === 'month' ? 11 : 11 },
+                        maxRotation: view === 'day' ? 45 : (view === 'month' ? 45 : 0),
+                        minRotation: view === 'day' ? 0 : (view === 'month' ? 0 : 0)
                     }
                 },
                 y: {

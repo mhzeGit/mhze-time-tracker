@@ -248,16 +248,104 @@ section h2 {
 }
 
 /* === FILTERS === */
+.filters-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: visible;
+}
+
+.filters-section.collapsed {
+    overflow: hidden;
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.filters-header:hover {
+    background: var(--bg-tertiary);
+}
+
+.filters-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filters-active-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #4a9eff;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 20px;
+}
+
+.filters-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filters-toggle-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.toggle-icon {
+    font-size: 12px;
+    transition: transform 0.3s;
+    display: inline-block;
+}
+
+.filters-section.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
 .filters-container {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
     align-items: flex-end;
-    margin-bottom: 20px;
-    padding: 20px;
-    background: var(--bg-tertiary);
-    border-radius: 6px;
-    border: 1px solid var(--border-subtle);
+    padding: 0 24px 20px 24px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-subtle);
+    max-height: 500px;
+    opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    overflow: visible;
+}
+
+.filters-section.collapsed .filters-container {
+    max-height: 0;
+    opacity: 0;
+    padding: 0 24px;
+    overflow: hidden;
 }
 
 .filter-group {
@@ -386,7 +474,7 @@ section h2 {
     box-shadow: var(--shadow-md);
     max-height: 300px;
     overflow-y: auto;
-    z-index: 100;
+    z-index: 1000;
     display: none;
 }
 
@@ -726,6 +814,8 @@ section h2 {
     max-width: 100%;
     margin: 0 auto 24px auto; /* Add bottom margin */
     padding: 0;
+    background: transparent;
+    border: none;
 }
 
 .chart-container {
@@ -1109,6 +1199,7 @@ form {
     .filters-container {
         flex-direction: column;
         gap: 12px;
+        padding: 0 20px 20px 20px;
     }
 
     .filter-group {

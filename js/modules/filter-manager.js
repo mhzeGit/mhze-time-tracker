@@ -30,6 +30,7 @@ const FilterManager = {
      * Apply filter and update UI
      */
     applyFilters() {
+        this.updateActiveFilterBadge();
         CacheManager.saveCache();
         UIRenderer.renderAll();
     },
@@ -41,16 +42,16 @@ const FilterManager = {
         App.filters.typeId = '';
         App.filters.dateStart = '';
         App.filters.dateEnd = '';
-        
+
         // Reset custom dropdown
         const customSelect = document.getElementById('filterType');
         const trigger = customSelect.querySelector('.selected-text');
         trigger.textContent = 'All Types';
-        
+
         // Clear date inputs
         document.getElementById('filterDateStart').value = '';
         document.getElementById('filterDateEnd').value = '';
-        
+
         // Update selected state in dropdown
         const dropdown = customSelect.querySelector('.custom-select-dropdown');
         dropdown.querySelectorAll('.custom-option').forEach(opt => {
@@ -60,12 +61,31 @@ const FilterManager = {
                 opt.classList.remove('selected');
             }
         });
-        
+
+        this.updateActiveFilterBadge();
         CacheManager.saveCache();
         UIRenderer.renderAll();
     },
 
     /**
+     * Update active filter count badge
+     */
+    updateActiveFilterBadge() {
+        const badge = document.getElementById('filtersActiveBadge');
+        if (!badge) return;
+
+        let activeCount = 0;
+        if (App.filters.typeId) activeCount++;
+        if (App.filters.dateStart) activeCount++;
+        if (App.filters.dateEnd) activeCount++;
+
+        if (activeCount > 0) {
+            badge.textContent = activeCount;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    },    /**
      * Update filter dropdown with types
      */
     updateFilterDropdown() {
