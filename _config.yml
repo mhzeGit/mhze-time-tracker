@@ -1,0 +1,23 @@
+# GitHub Pages Configuration
+# Time Tracker - Static Web Application
+
+# Exclude documentation files from Jekyll processing
+exclude:
+  - "*.md"
+  - js/
+  - .vs/
+  - sample-data.json
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Theme (optional - you're using custom HTML/CSS)
+# theme: jekyll-theme-minimal
+
+# Site settings
+title: Time Tracker
+description: A clean time-tracking web application
+encoding: utf-8
