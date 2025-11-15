@@ -1,0 +1,224 @@
+/**
+ * Event Listeners Setup
+ * Sets up all DOM event listeners for the application
+ */
+const EventListeners = {
+    /**
+     * Setup all event listeners
+     */
+    setup() {
+        this.setupTopBarButtons();
+        this.setupFilterControls();
+        this.setupSortableHeaders();
+        this.setupTaskModal();
+        this.setupTypeModal();
+        this.setupViewSwitcher();
+        this.setupWindowResize();
+    },
+
+    /**
+     * Setup top bar buttons
+     */
+    setupTopBarButtons() {
+        document.getElementById('loadDataBtn').addEventListener('click', () => {
+            DataManager.loadData();
+        });
+        
+        document.getElementById('saveDataBtn').addEventListener('click', () => {
+            DataManager.saveData();
+        });
+        
+        document.getElementById('addTaskBtn').addEventListener('click', () => {
+            ModalManager.openAddModal();
+        });
+        
+        document.getElementById('addTypeBtn').addEventListener('click', () => {
+            TypeModalManager.openAddModal();
+        });
+    },
+
+    /**
+     * Setup filter controls
+     */
+    setupFilterControls() {
+        const filterTypeSelect = document.getElementById('filterType');
+        const filterTrigger = filterTypeSelect.querySelector('.custom-select-trigger');
+        const filterDropdown = filterTypeSelect.querySelector('.custom-select-dropdown');
+        
+        // Toggle dropdown
+        filterTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterTypeSelect.classList.toggle('open');
+        });
+        
+        // Handle option selection
+        filterDropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.custom-option');
+            if (!option) return;
+            
+            const value = option.dataset.value;
+            const text = option.querySelector('.option-text').textContent;
+            
+            App.filters.typeId = value;
+            filterTrigger.querySelector('.selected-text').textContent = text;
+            
+            filterDropdown.querySelectorAll('.custom-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            option.classList.add('selected');
+            
+            filterTypeSelect.classList.remove('open');
+            FilterManager.applyFilters();
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!filterTypeSelect.contains(e.target)) {
+                filterTypeSelect.classList.remove('open');
+            }
+        });
+        
+        // Keyboard support
+        filterTypeSelect.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                filterTypeSelect.classList.toggle('open');
+            } else if (e.key === 'Escape') {
+                filterTypeSelect.classList.remove('open');
+            }
+        });
+
+        // Date filter controls
+        const filterDateStart = document.getElementById('filterDateStart');
+        const filterDateEnd = document.getElementById('filterDateEnd');
+        
+        filterDateStart.addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        filterDateEnd.addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        filterDateStart.addEventListener('change', (e) => {
+            App.filters.dateStart = e.target.value;
+            FilterManager.applyFilters();
+        });
+
+        filterDateEnd.addEventListener('change', (e) => {
+            App.filters.dateEnd = e.target.value;
+            FilterManager.applyFilters();
+        });
+
+        document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+            FilterManager.clearFilters();
+        });
+    },
+
+    /**
+     * Setup sortable table headers
+     */
+    setupSortableHeaders() {
+        document.querySelectorAll('.sortable').forEach(header => {
+            header.addEventListener('click', () => {
+                const column = header.getAttribute('data-sort');
+                SortManager.sortEntries(column);
+            });
+        });
+    },
+
+    /**
+     * Setup task modal event listeners
+     */
+    setupTaskModal() {
+        document.getElementById('closeModal').addEventListener('click', () => {
+            ModalManager.closeModal();
+        });
+        
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            ModalManager.closeModal();
+        });
+        
+        document.getElementById('taskModal').addEventListener('click', (e) => {
+            if (e.target.id === 'taskModal') {
+                ModalManager.closeModal();
+            }
+        });
+        
+        document.getElementById('taskForm').addEventListener('submit', (e) => {
+            ModalManager.handleFormSubmit(e);
+        });
+        
+        const taskDateInput = document.getElementById('taskDate');
+        taskDateInput.addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        document.getElementById('taskStartTime').addEventListener('change', () => {
+            ModalManager.updateDurationDisplay();
+        });
+        
+        document.getElementById('taskEndTime').addEventListener('change', () => {
+            ModalManager.updateDurationDisplay();
+        });
+    },
+
+    /**
+     * Setup type modal event listeners
+     */
+    setupTypeModal() {
+        document.getElementById('closeTypeModal').addEventListener('click', () => {
+            TypeModalManager.closeModal();
+        });
+        
+        document.getElementById('cancelTypeBtn').addEventListener('click', () => {
+            TypeModalManager.closeModal();
+        });
+        
+        document.getElementById('typeModal').addEventListener('click', (e) => {
+            if (e.target.id === 'typeModal') {
+                TypeModalManager.closeModal();
+            }
+        });
+        
+        document.getElementById('typeForm').addEventListener('submit', (e) => {
+            TypeModalManager.handleFormSubmit(e);
+        });
+        
+        document.getElementById('typeColor').addEventListener('input', (e) => {
+            document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+        });
+    },
+
+    /**
+     * Setup view switcher for time graph
+     */
+    setupViewSwitcher() {
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const view = e.target.dataset.view;
+                App.currentTimeView = view;
+                
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                ChartRenderer.renderTimeGraph();
+            });
+        });
+    },
+
+    /**
+     * Setup window resize handler
+     */
+    setupWindowResize() {
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                UIRenderer.renderCharts();
+            }, 250);
+        });
+    }
+};
+
+window.EventListeners = EventListeners;
