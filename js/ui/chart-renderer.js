@@ -62,7 +62,11 @@ const ChartRenderer = {
                         labels: {
                             color: '#f1f5f9',
                             padding: 15,
-                            font: { size: 12 }
+                            font: { size: 12 },
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            boxWidth: 12,
+                            boxHeight: 12
                         }
                     },
                     tooltip: {
@@ -180,7 +184,11 @@ const ChartRenderer = {
                     labels: {
                         color: '#f1f5f9',
                         padding: 15,
-                        font: { size: 12 }
+                        font: { size: 12 },
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded',
+                        boxWidth: 12,
+                        boxHeight: 12
                     }
                 },
                 tooltip: {
