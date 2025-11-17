@@ -767,7 +767,7 @@ section h2 {
 .entry-action-btn:hover {
     background: var(--bg-hover);
     color: var(--text-primary);
-    transform: translateY(-1px);
+    transform: none;
 }
 
 .entry-action-btn:active {
@@ -792,7 +792,7 @@ section h2 {
 .entry-action-btn.edit-btn:hover {
     background: var(--bg-hover) !important;
     border-color: var(--border-strong) !important;
-    transform: translateY(-1px) !important;
+    transform: none !important;
 }
 
 .entry-action-btn.edit-btn .icon {
@@ -824,7 +824,7 @@ section h2 {
 .btn.edit-type-btn:hover {
     background: var(--bg-hover) !important;
     border-color: var(--border-strong) !important;
-    transform: translateY(-1px) !important;
+    transform: none !important;
 }
 
 .btn.edit-type-btn .icon {
@@ -836,24 +836,17 @@ section h2 {
 .entry-action-btn.delete-btn {
     background: transparent;
     color: #c75c5c;
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
     padding: 4px 8px;
     line-height: 1;
     min-height: 36px;
 }
 
-.entry-action-btn.delete-btn:hover {
-    background: transparent;
-    color: #ff6b6b;
-    transform: scale(1.15);
-    font-weight: 900;
-}
-
 .btn.delete-type-btn {
     background: transparent !important;
     color: #c75c5c !important;
-    font-size: 24px !important;
+    font-size: 26px !important;
     font-weight: 700 !important;
     padding: 2px 12px !important;
     line-height: 1 !important;
@@ -863,7 +856,7 @@ section h2 {
 .btn.delete-type-btn:hover {
     background: transparent !important;
     color: #ff6b6b !important;
-    transform: scale(1.15) !important;
+    transform: none !important;
     font-weight: 900 !important;
 }
 
@@ -1053,6 +1046,8 @@ section h2 {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
 }
 
 /* === MODALS === */
