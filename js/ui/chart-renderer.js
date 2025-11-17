@@ -41,6 +41,12 @@ const ChartRenderer = {
             }
         });
 
+        // Determine if on mobile
+        const isMobile = window.innerWidth <= 768;
+        const legendFontSize = isMobile ? 9 : 12;
+        const legendPadding = isMobile ? 8 : 15;
+        const legendBoxSize = isMobile ? 8 : 12;
+
         App.charts.pie = new Chart(ctx, {
             type: 'pie',
             data: {
@@ -61,12 +67,12 @@ const ChartRenderer = {
                         position: 'bottom',
                         labels: {
                             color: '#f1f5f9',
-                            padding: 15,
-                            font: { size: 12 },
+                            padding: legendPadding,
+                            font: { size: legendFontSize },
                             usePointStyle: true,
                             pointStyle: 'rectRounded',
-                            boxWidth: 12,
-                            boxHeight: 12
+                            boxWidth: legendBoxSize,
+                            boxHeight: legendBoxSize
                         }
                     },
                     tooltip: {
@@ -173,6 +179,13 @@ const ChartRenderer = {
      * Get common stacked bar chart options
      */
     getStackedBarOptions(view, suggestedMax) {
+        // Determine if on mobile
+        const isMobile = window.innerWidth <= 768;
+        const legendFontSize = isMobile ? 9 : 12;
+        const legendPadding = isMobile ? 8 : 15;
+        const legendBoxSize = isMobile ? 8 : 12;
+        const axisFontSize = isMobile ? 9 : 11;
+        
         return {
             responsive: true,
             maintainAspectRatio: true,
@@ -183,12 +196,12 @@ const ChartRenderer = {
                     position: 'bottom',
                     labels: {
                         color: '#f1f5f9',
-                        padding: 15,
-                        font: { size: 12 },
+                        padding: legendPadding,
+                        font: { size: legendFontSize },
                         usePointStyle: true,
                         pointStyle: 'rectRounded',
-                        boxWidth: 12,
-                        boxHeight: 12
+                        boxWidth: legendBoxSize,
+                        boxHeight: legendBoxSize
                     }
                 },
                 tooltip: {
@@ -218,7 +231,7 @@ const ChartRenderer = {
                     },
                     ticks: {
                         color: '#94a3b8',
-                        font: { size: view === 'month' ? 11 : 11 },
+                        font: { size: axisFontSize },
                         maxRotation: view === 'day' ? 45 : (view === 'month' ? 45 : 0),
                         minRotation: view === 'day' ? 0 : (view === 'month' ? 0 : 0)
                     }
@@ -233,7 +246,7 @@ const ChartRenderer = {
                     },
                     ticks: {
                         color: '#94a3b8',
-                        font: { size: 11 },
+                        font: { size: axisFontSize },
                         stepSize: 1,
                         callback: function(value) {
                             return Math.round(value) + 'h';
