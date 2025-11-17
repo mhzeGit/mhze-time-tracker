@@ -48,14 +48,13 @@ const UIRenderer = {
                 <div class="type-color-indicator" style="background-color: ${type.color};"></div>
                 <div class="type-name">${Helpers.escapeHtml(type.name)}</div>
                 <div class="type-actions">
-                    <button class="btn btn-secondary btn-small edit-type-btn" data-id="${type.id}">
+                    <button class="btn btn-secondary btn-small edit-type-btn" data-id="${type.id}" title="Edit type">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
                         </span>
-                        Edit
                     </button>
                     <button class="btn btn-danger btn-small delete-type-btn" data-id="${type.id}" title="Delete type">&times;</button>
                 </div>
@@ -129,7 +128,14 @@ const UIRenderer = {
                     <div class="entry-col entry-col-time" data-label="End">${entry.endTime}</div>
                     <div class="entry-col entry-col-duration" data-label="Duration">${Helpers.formatDuration(entry.durationMinutes)}</div>
                     <div class="entry-col entry-col-actions">
-                        <button class="entry-action-btn edit-btn" data-id="${entry.id}">Edit</button>
+                        <button class="entry-action-btn edit-btn" data-id="${entry.id}" title="Edit entry">
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </span>
+                        </button>
                         <button class="entry-action-btn delete-btn" data-id="${entry.id}" title="Delete entry">&times;</button>
                     </div>
                 </div>

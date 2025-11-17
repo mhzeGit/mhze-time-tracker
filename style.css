@@ -775,25 +775,60 @@ section h2 {
 }
 
 .entry-action-btn.edit-btn {
-    background: #6b7280;
-    color: white;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    padding: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border: 1px solid var(--border-default) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .entry-action-btn.edit-btn:hover {
-    background: #9ca3af;
+    background: var(--bg-hover) !important;
+    border-color: var(--border-strong) !important;
+    transform: translateY(-1px) !important;
+}
+
+.entry-action-btn.edit-btn .icon {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+.entry-action-btn.edit-btn .icon svg {
+    width: 100%;
+    height: 100%;
 }
 
 .btn.edit-type-btn {
-    background: #6b7280 !important;
-    color: white !important;
-    padding: 8px 12px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    padding: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border: 1px solid var(--border-default) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .btn.edit-type-btn:hover {
-    background: #9ca3af !important;
+    background: var(--bg-hover) !important;
+    border-color: var(--border-strong) !important;
     transform: translateY(-1px) !important;
+}
+
+.btn.edit-type-btn .icon {
+    width: 16px;
+    height: 16px;
+    margin: 0;
 }
 
 .entry-action-btn.delete-btn {
@@ -1140,6 +1175,7 @@ form {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    flex-wrap: nowrap;
 }
 
 .duration-display {
@@ -1663,10 +1699,19 @@ form {
         gap: 4px;
     }
     
-    .type-actions .btn {
-        padding: 5px 8px;
-        font-size: 10px;
-        min-height: 28px;
+    .type-actions .btn.edit-type-btn {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+    }
+    
+    .type-actions .btn.delete-type-btn {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        font-size: 18px !important;
     }
 
     /* Entry rows small mobile */
@@ -1738,5 +1783,12 @@ form {
     
     .filters-container {
         padding: 0 12px 12px 12px;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        font-size: 20px !important;
     }
 }
+
+/* Mobile devices (480px and below) */
