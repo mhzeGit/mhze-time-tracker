@@ -1,0 +1,70 @@
+<!-- Quick Test Page for Color Picker -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker Preview</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div style="max-width: 600px; margin: 50px auto; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 40px;">New Color Picker Preview</h1>
+        
+        <!-- Demo of the new color palette -->
+        <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px;">
+            <h2 style="margin-bottom: 16px;">Select a Color</h2>
+            
+            <div class="color-palette" id="demoColorPalette">
+                <button type="button" class="color-option selected" data-color="#ef4444" style="background-color: #ef4444;" title="Red"></button>
+                <button type="button" class="color-option" data-color="#f97316" style="background-color: #f97316;" title="Orange"></button>
+                <button type="button" class="color-option" data-color="#eab308" style="background-color: #eab308;" title="Yellow"></button>
+                <button type="button" class="color-option" data-color="#84cc16" style="background-color: #84cc16;" title="Lime"></button>
+                <button type="button" class="color-option" data-color="#10b981" style="background-color: #10b981;" title="Green"></button>
+                <button type="button" class="color-option" data-color="#06b6d4" style="background-color: #06b6d4;" title="Cyan"></button>
+                <button type="button" class="color-option" data-color="#3b82f6" style="background-color: #3b82f6;" title="Blue"></button>
+                <button type="button" class="color-option" data-color="#8b5cf6" style="background-color: #8b5cf6;" title="Purple"></button>
+                <button type="button" class="color-option" data-color="#ec4899" style="background-color: #ec4899;" title="Pink"></button>
+                <button type="button" class="color-option" data-color="#64748b" style="background-color: #64748b;" title="Gray"></button>
+                <button type="button" class="custom-color-option" title="Custom Color">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div style="margin-top: 20px; padding: 16px; background: var(--bg-primary); border-radius: 8px;">
+                <p style="color: var(--text-secondary); font-size: 14px; margin: 0;">
+                    ? <strong>Features:</strong>
+                </p>
+                <ul style="color: var(--text-secondary); font-size: 14px; margin: 10px 0 0 20px;">
+                    <li>10 beautiful predefined colors covering full spectrum</li>
+                    <li>Compact 24px buttons in single row</li>
+                    <li>Only 4px gap between colors - very tight grid</li>
+                    <li>Custom color option with gradient button</li>
+                    <li>Hover effect: colors scale up</li>
+                    <li>Selected color shows checkmark</li>
+                    <li>Mobile responsive (2 rows on small screens)</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="index.html" style="display: inline-block; padding: 12px 24px; background: #4a9eff; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                Open Time Tracker ?
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Simple demo script
+        const colorOptions = document.querySelectorAll('#demoColorPalette .color-option');
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                colorOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>
