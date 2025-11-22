@@ -667,16 +667,17 @@ section h2 {
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-subtle);
     border-radius: 4px;
-    transition: background 0.15s;
+    transition: background 0.15s, border-color 0.15s;
     align-items: center;
 }
 
 .entry-row:nth-child(even) {
-    background: rgba(38, 38, 38, 0.8);
+    background: rgba(38, 38, 38, 0.9); /* Slightly darker for alternating rows */
 }
 
 .entry-row:hover {
-    background: var(--bg-hover);
+    background: var(--bg-hover); /* Highlight row on hover */
+    border-color: var(--border-default); /* Subtle border highlight */
 }
 
 .entry-col {
@@ -741,9 +742,25 @@ section h2 {
 .entry-col-actions {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
-    border-right: none;
-    padding-left: 10px;
+    justify-content: flex-end; /* Align buttons to the right */
+    padding-left: 10px; /* Maintain spacing */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Ensure edit and delete buttons are aligned to the right side of the row */
+.entry-col-actions {
+    justify-content: flex-end; /* Align buttons to the right */
+    padding-left: 10px; /* Maintain spacing */
+    gap: 8px; /* Space between buttons */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Adjust text columns to leave enough space */
+.entry-col {
+    flex: 1; /* Allow text columns to take available space */
+    overflow: hidden; /* Prevent overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+    white-space: nowrap; /* Keep text in a single line */
 }
 
 .entry-action-btn {
@@ -841,6 +858,15 @@ section h2 {
     padding: 4px 8px;
     line-height: 1;
     min-height: 36px;
+}
+
+/* Fix for delete icon visibility */
+.entry-action-btn.delete-btn .icon {
+    display: inline-flex; /* Ensure the icon is visible */
+    width: 18px; /* Adjust width for proper sizing */
+    height: 18px; /* Adjust height for proper sizing */
+    justify-content: center;
+    align-items: center;
 }
 
 .btn.delete-type-btn {
@@ -1015,39 +1041,27 @@ section h2 {
 
 .type-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 12px;
     padding: 14px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-subtle);
+    background: var(--bg-tertiary); /* Updated to a slightly lighter background for better contrast */
+    border: 1px solid var(--border-default);
     border-radius: 8px;
     transition: border-color 0.2s;
 }
 
 .type-item:hover {
-    border-color: var(--border-default);
+    border-color: var(--accent-primary); /* Highlight with primary accent color */
+    background: var(--bg-hover); /* Slightly darker hover effect */
 }
 
 .type-color-indicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 24px; /* Increased width for better visibility */
+    height: 24px; /* Increased height for better visibility */
+    border-radius: 4px; /* Keeping the rounded corners */
     flex-shrink: 0;
-}
-
-.type-name {
-    flex: 1;
-    font-weight: 500;
-    color: var(--text-primary);
-    font-size: 14px;
-}
-
-.type-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+    border: 1px solid var(--border-strong); /* Ensure it stands out */
 }
 
 /* === MODALS === */
@@ -1545,8 +1559,11 @@ form {
     }
     
     .type-color-indicator {
-        width: 16px;
-        height: 16px;
+        width: 24px; /* Increased width for better visibility */
+        height: 24px; /* Increased height for better visibility */
+        border-radius: 4px; /* Keeping the rounded corners */
+        flex-shrink: 0;
+        border: 1px solid var(--border-strong); /* Ensure it stands out */
     }
     
     .type-name {
@@ -1771,8 +1788,11 @@ form {
     }
     
     .type-color-indicator {
-        width: 14px;
-        height: 14px;
+        width: 24px; /* Increased width for better visibility */
+        height: 24px; /* Increased height for better visibility */
+        border-radius: 4px; /* Keeping the rounded corners */
+        flex-shrink: 0;
+        border: 1px solid var(--border-strong); /* Ensure it stands out */
     }
     
     .type-name {
@@ -1875,4 +1895,13 @@ form {
     }
 }
 
-/* Mobile devices (480px and below) */
+/* Ensure delete and edit buttons are always horizontally aligned */
+.type-actions {
+    display: flex; /* Use flexbox for alignment */
+    flex-direction: row; /* Force horizontal alignment */
+    justify-content: flex-end; /* Align buttons to the right */
+    align-items: center; /* Align buttons vertically */
+    gap: 8px; /* Space between buttons */
+    flex-shrink: 0; /* Prevent shrinking */
+    white-space: nowrap; /* Prevent wrapping */
+}
