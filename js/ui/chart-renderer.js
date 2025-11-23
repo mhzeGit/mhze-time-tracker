@@ -191,66 +191,95 @@ const ChartRenderer = {
             const container = document.createElement('div');
             Object.assign(container.style, { position: 'absolute', left: '0', top: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '10', overflow: 'visible' });
             parent.appendChild(container);
-            chart.$multiTooltip = { container };
+            // Single reusable tooltip element (created lazily)
+            chart.$multiTooltip = { container, tip: null, prevId: null };
         },
         afterEvent(chart, args) {
             if (chart.config.type !== 'bar') return;
             const mt = chart.$multiTooltip; if (!mt) return;
             const { event } = args; if (!event) return;
 
-            const clearTips = () => { Array.from(mt.container.querySelectorAll('[data-tip-id]')).forEach(el => el.remove()); };
+            const ensureTip = () => {
+                if (mt.tip) return mt.tip;
+                const tip = document.createElement('div');
+                Object.assign(tip.style, {
+                    position: 'absolute',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '6px 8px',
+                    font: '11px sans-serif',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    transform: 'translateY(-50%) scale(0.95)',
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    filter: 'drop-shadow(0 0 0 rgba(0,0,0,0.55)) drop-shadow(0 4px 8px rgba(0,0,0,0.35))',
+                    opacity: '0',
+                    transition: 'left .18s ease, top .18s ease, transform .18s ease, background-color .25s ease, opacity .18s ease'
+                });
+                const colorBox = document.createElement('span'); colorBox.className = 'cb'; Object.assign(colorBox.style, { width: '8px', height: '8px', borderRadius: '2px', flex: '0 0 auto', opacity: '0.55', background: '#000' }); tip.appendChild(colorBox);
+                const text = document.createElement('span'); text.className = 'txt'; tip.appendChild(text);
+                const arrowWrapper = document.createElement('div'); arrowWrapper.className = 'arr'; Object.assign(arrowWrapper.style, { position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: '8px', height: '16px', pointerEvents: 'none' });
+                // Create SVG arrow once and reuse it
+                const arrowWidth = 7; const arrowHeight = 16;
+                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width', `${arrowWidth}`); svg.setAttribute('height', `${arrowHeight}`); svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`); svg.style.display = 'block';
+                const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+                poly.setAttribute('points', `${arrowWidth},${arrowHeight/2} 0,0 0,${arrowHeight}`);
+                poly.setAttribute('fill', '#000');
+                // Match color transition with tooltip background-color
+                poly.style.transition = 'fill .25s ease';
+                svg.appendChild(poly);
+                arrowWrapper.appendChild(svg);
+                tip.appendChild(arrowWrapper);
+                // store references for updates
+                tip._arrow = { wrapper: arrowWrapper, svg, poly, width: arrowWidth };
+                mt.container.appendChild(tip);
+                mt.tip = tip;
+                return tip;
+            };
 
-            if (event.type === 'mouseout') { clearTips(); return; }
+            const hideTip = () => {
+                if (!mt.tip) return;
+                mt.tip.style.opacity = '0';
+                mt.tip.style.transform = 'translateY(-50%) scale(0.95)';
+                mt.prevId = null;
+            };
+
+            if (event.type === 'mouseout') { hideTip(); return; }
 
             const actives = chart.getActiveElements();
-            if (!actives || actives.length === 0) { clearTips(); return; }
+            if (!actives || actives.length === 0) { hideTip(); return; }
 
-            // Helper to validate a target and return its element/value or null
+            // Validate target segment
             const validateTarget = (dsIndex, idx) => {
                 const meta = chart.getDatasetMeta(dsIndex);
                 const el = meta && meta.data ? meta.data[idx] : null; if (!el) return null;
                 const value = chart.data.datasets[dsIndex].data[idx]; if (!value || value <= 0) return null;
                 const props = el.getProps(['x','y','base','width','height'], true);
-                // ignore completely collapsed segments
                 if (!props || !isFinite(props.x) || Math.abs(props.height) === 0) return null;
                 return { el, value, props };
             };
 
-            // Start from the primary active
             let a = actives[0];
             let target = validateTarget(a.datasetIndex, a.index);
-
-            // Fallback: if nearest element is zero/invalid, pick closest non-zero segment in same index
             if (!target) {
-                const idx = a.index;
-                let best = null;
+                const idx = a.index; let best = null;
                 for (let d = 0; d < chart.data.datasets.length; d++) {
-                    const cand = validateTarget(d, idx);
-                    if (!cand) continue;
+                    const cand = validateTarget(d, idx); if (!cand) continue;
                     const dist = Math.abs((event.y ?? 0) - (Math.min(cand.props.y, cand.props.base) + Math.abs(cand.props.height)/2));
                     if (!best || dist < best.dist) best = { ds: d, ...cand, dist };
                 }
-                if (best) {
-                    a = { datasetIndex: best.ds, index: a.index };
-                    target = { el: best.el, value: best.value, props: best.props };
-                }
+                if (best) { a = { datasetIndex: best.ds, index: a.index }; target = { el: best.el, value: best.value, props: best.props }; }
             }
+            if (!target) { hideTip(); return; }
 
-            if (!target) { clearTips(); return; }
+            const tip = ensureTip();
+            const id = `${a.datasetIndex}:${a.index}`;
+            const changed = id !== mt.prevId;
 
-            const used = new Set();
-            const id = `${a.datasetIndex}:${a.index}`; used.add(id);
-            let tip = mt.container.querySelector(`[data-tip-id="${id}"]`);
-            if (!tip) {
-                tip = document.createElement('div'); tip.setAttribute('data-tip-id', id);
-                Object.assign(tip.style, { position: 'absolute', border: 'none', borderRadius: '6px', padding: '6px 8px', font: '11px sans-serif', whiteSpace: 'nowrap', pointerEvents: 'none', transform: 'translateY(-50%)', boxSizing: 'border-box', display: 'flex', alignItems: 'center', gap: '6px', filter: 'drop-shadow(0 0 0 rgba(0,0,0,0.55)) drop-shadow(0 4px 8px rgba(0,0,0,0.35))' });
-                const colorBox = document.createElement('span'); colorBox.className = 'cb'; Object.assign(colorBox.style, { width: '8px', height: '8px', borderRadius: '2px', flex: '0 0 auto', opacity: '0.55', background: '#000' }); tip.appendChild(colorBox);
-                const text = document.createElement('span'); text.className = 'txt'; tip.appendChild(text);
-                const arrowWrapper = document.createElement('div'); arrowWrapper.className = 'arr'; Object.assign(arrowWrapper.style, { position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: '8px', height: '16px', pointerEvents: 'none' }); tip.appendChild(arrowWrapper);
-                mt.container.appendChild(tip);
-            }
-
-            // helper to derive darker text color from background
+            // Text color derivation
             const deriveTextColor = (hex) => {
                 if (!hex || typeof hex !== 'string') return '#0f172a';
                 if (hex.startsWith('rgb')) return '#0f172a';
@@ -261,49 +290,47 @@ const ChartRenderer = {
                 const rn = r/255, gn = g/255, bn = b/255;
                 const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
                 let h, s; const l = (max+min)/2;
-                if (max === min) { h = 0; s = 0; } else {
-                    const d = max - min;
-                    s = l > .5 ? d/(2-max-min) : d/(max+min);
-                    switch(max){case rn: h=(gn-bn)/d+(gn<bn?6:0); break; case gn: h=(bn-rn)/d+2; break; case bn: h=(rn-gn)/d+4; break; }
-                    h/=6;
-                }
-                const l2 = Math.max(0, Math.min(1, l * 0.45));
-                const s2 = Math.max(0, Math.min(1, s * 0.5));
+                if (max === min) { h = 0; s = 0; } else { const d = max - min; s = l > .5 ? d/(2-max-min) : d/(max+min); switch(max){case rn: h=(gn-bn)/d+(gn<bn?6:0); break; case gn: h=(bn-rn)/d+2; break; case bn: h=(rn-gn)/d+4; break; } h/=6; }
+                const l2 = Math.max(0, Math.min(1, l * 0.45)); const s2 = Math.max(0, Math.min(1, s * 0.5));
                 const hue2rgb = (p,q,t)=>{ if(t<0) t+=1; if(t>1) t-=1; if(t<1/6) return p+(q-p)*6*t; if(t<1/2) return q; if(t<2/3) return p+(q-p)*(2/3 - t)*6; return p; };
-                let r2,g2,b2; if(s2===0){ r2=g2=b2=l2; } else { const q = l2 < .5 ? l2 * (1+s2) : l2 + s2 - l2*s2; const p = 2*l2 - q; r2 = hue2rgb(p,q,h+1/3); g2 = hue2rgb(p,q,h); b2 = hue2rgb(p,q,h-1/3);} 
-                return `rgb(${Math.round(r2*255)},${Math.round(g2*255)},${Math.round(b2*255)})`;
-            };
+                let r2,g2,b2; if(s2===0){ r2=g2=b2=l2; } else { const q = l2 < .5 ? l2 * (1+s2) : l2 + s2 - l2*s2; const p = 2*l2 - q; r2 = hue2rgb(p,q,h+1/3); g2 = hue2rgb(p,q,h); b2 = hue2rgb(p,q,h-1/3);} return `rgb(${Math.round(r2*255)},${Math.round(g2*255)},${Math.round(b2*255)})`; };
 
             const dsColor = chart.data.datasets[a.datasetIndex].backgroundColor;
-            tip.style.background = dsColor;
+            // Use backgroundColor (not shorthand) so the transition targets the right property
+            tip.style.backgroundColor = dsColor;
             const textColor = deriveTextColor(dsColor);
-            const txt = tip.querySelector('.txt'); if (txt) { txt.style.color = textColor; txt.style.textShadow = 'none'; }
-            const cb = tip.querySelector('.cb'); if (cb) cb.style.background = textColor;
+            const txt = tip.querySelector('.txt'); const cb = tip.querySelector('.cb'); if (txt) txt.style.color = textColor; if (cb) cb.style.background = textColor;
             const hours = target.value; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60); if (txt) txt.textContent = `${chart.data.datasets[a.datasetIndex].label}: ${h}h ${mins}m`;
 
-            // position tooltip to left of the hovered segment
+            // Position
             const props = target.props;
             const segmentLeft = props.x - props.width / 2; const topY = Math.min(props.y, props.base); const centerY = topY + Math.abs(props.height)/2;
             const gap = 8; const tipWidth = tip.offsetWidth || 0; const left = segmentLeft - gap - tipWidth;
             tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(centerY)}px`;
 
-            // right-pointing arrow
-            const arrowWrapper = tip.querySelector('.arr'); if (arrowWrapper) {
-                arrowWrapper.innerHTML = '';
-                const arrowWidth = 7; const arrowHeight = tip.offsetHeight;
-                arrowWrapper.style.top = '0'; arrowWrapper.style.transform = 'none';
+            // Arrow update (right pointing) without recreating elements
+            if (tip._arrow) {
+                const arrowWidth = tip._arrow.width;
+                const arrowHeight = tip.offsetHeight;
+                const { wrapper, svg, poly } = tip._arrow;
+                Object.assign(wrapper.style, { right: `-${arrowWidth}px`, left: '', width: `${arrowWidth}px`, height: `${arrowHeight}px`, top: '0', transform: 'none' });
                 tip.style.borderTopRightRadius = '0px'; tip.style.borderBottomRightRadius = '0px';
-                Object.assign(arrowWrapper.style, { right: `-${arrowWidth}px`, left: '' });
-                arrowWrapper.style.width = `${arrowWidth}px`; arrowWrapper.style.height = `${arrowHeight}px`;
-                const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width', `${arrowWidth}`); svg.setAttribute('height', `${arrowHeight}`); svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`); svg.style.display = 'block';
-                const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+                svg.setAttribute('width', `${arrowWidth}`);
+                svg.setAttribute('height', `${arrowHeight}`);
+                svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`);
                 poly.setAttribute('points', `${arrowWidth},${arrowHeight/2} 0,0 0,${arrowHeight}`);
-                poly.setAttribute('fill', dsColor); poly.setAttribute('stroke','none');
-                svg.appendChild(poly); arrowWrapper.appendChild(svg);
+                poly.setAttribute('fill', dsColor);
             }
 
-            // cleanup any stale tips
-            Array.from(mt.container.querySelectorAll('[data-tip-id]')).forEach(el => { const rid = el.getAttribute('data-tip-id'); if (!used.has(rid)) el.remove(); });
+            // Animate appearance / change
+            if (changed) {
+                tip.style.transform = 'translateY(-50%) scale(0.92)';
+                requestAnimationFrame(() => { tip.style.transform = 'translateY(-50%) scale(1)'; });
+            } else {
+                tip.style.transform = 'translateY(-50%) scale(1)';
+            }
+            tip.style.opacity = '1';
+            mt.prevId = id;
         },
         afterDestroy(chart) { const mt = chart.$multiTooltip; if (mt && mt.container && mt.container.parentNode) mt.container.parentNode.removeChild(mt.container); chart.$multiTooltip = null; }
     },
