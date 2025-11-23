@@ -61,6 +61,10 @@ const ChartRenderer = {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                interaction: {
+                    mode: 'nearest',
+                    intersect: true
+                },
                 plugins: {
                     legend: {
                         display: true,
@@ -75,23 +79,13 @@ const ChartRenderer = {
                             boxHeight: legendBoxSize
                         }
                     },
+                    // Disable Chart.js default tooltip; use custom plugin for identical visuals
                     tooltip: {
-                        backgroundColor: 'rgba(30, 41, 59, 0.95)',
-                        titleColor: '#f1f5f9',
-                        bodyColor: '#cbd5e1',
-                        borderColor: '#334155',
-                        borderWidth: 1,
-                        padding: 12,
-                        callbacks: {
-                            label: function(context) {
-                                const hours = context.parsed;
-                                const mins = Math.round((hours - Math.floor(hours)) * 60);
-                                return `${context.label}: ${Math.floor(hours)}h ${mins}m`;
-                            }
-                        }
+                        enabled: false
                     }
                 }
-            }
+            },
+            plugins: [this.multiTooltipPlugin]
         });
     },
 
@@ -177,12 +171,12 @@ const ChartRenderer = {
     },
 
     /**
-     * Custom plugin to render single tooltip for hovered stacked bar segment
+     * Custom plugin to render single tooltip for hovered segment (bar or pie)
      */
     multiTooltipPlugin: {
         id: 'multiTooltipPlugin',
         afterInit(chart) {
-            if (chart.config.type !== 'bar') return;
+            if (!['bar','pie'].includes(chart.config.type)) return;
             const canvas = chart.canvas;
             const parent = canvas.parentNode;
             const style = getComputedStyle(parent);
@@ -194,7 +188,7 @@ const ChartRenderer = {
             chart.$multiTooltip = { container, tip: null, prevId: null };
         },
         afterEvent(chart, args) {
-            if (chart.config.type !== 'bar') return;
+            if (!['bar','pie'].includes(chart.config.type)) return;
             const mt = chart.$multiTooltip; if (!mt) return;
             const { event } = args; if (!event) return;
 
@@ -226,13 +220,11 @@ const ChartRenderer = {
                 const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width', `${arrowWidth}`); svg.setAttribute('height', `${arrowHeight}`); svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`); svg.style.display = 'block';
                 const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
                 poly.setAttribute('points', `${arrowWidth},${arrowHeight/2} 0,0 0,${arrowHeight}`);
-                // Transition fill via style so CSS transition applies reliably
                 poly.style.fill = '#000';
                 poly.style.transition = 'fill .25s ease';
                 svg.appendChild(poly);
                 arrowWrapper.appendChild(svg);
                 tip.appendChild(arrowWrapper);
-                // store references for updates
                 tip._arrow = { wrapper: arrowWrapper, svg, poly, width: arrowWidth };
                 mt.container.appendChild(tip);
                 mt.tip = tip;
@@ -251,8 +243,18 @@ const ChartRenderer = {
             const actives = chart.getActiveElements();
             if (!actives || actives.length === 0) { hideTip(); return; }
 
-            // Validate target segment
-            const validateTarget = (dsIndex, idx) => {
+            // Helpers
+            const getBgColor = (chart, dsIndex, idx) => {
+                const ds = chart.data.datasets[dsIndex];
+                const bg = ds && ds.backgroundColor;
+                if (Array.isArray(bg)) return bg[idx % bg.length];
+                return bg;
+            };
+
+            const type = chart.config.type;
+
+            // Validate target for bar
+            const validateTargetBar = (dsIndex, idx) => {
                 const meta = chart.getDatasetMeta(dsIndex);
                 const el = meta && meta.data ? meta.data[idx] : null; if (!el) return null;
                 const value = chart.data.datasets[dsIndex].data[idx]; if (!value || value <= 0) return null;
@@ -260,13 +262,24 @@ const ChartRenderer = {
                 if (!props || !isFinite(props.x) || Math.abs(props.height) === 0) return null;
                 return { el, value, props };
             };
+            // Validate target for pie
+            const validateTargetPie = (dsIndex, idx) => {
+                const meta = chart.getDatasetMeta(dsIndex);
+                const el = meta && meta.data ? meta.data[idx] : null; if (!el) return null;
+                const value = chart.data.datasets[dsIndex].data[idx]; if (!value || value <= 0) return null;
+                const props = el.getProps(['x','y','startAngle','endAngle','innerRadius','outerRadius'], true);
+                if (!props || !isFinite(props.x) || !isFinite(props.y)) return null;
+                return { el, value, props };
+            };
 
             let a = actives[0];
-            let target = validateTarget(a.datasetIndex, a.index);
-            if (!target) {
+            let target = type === 'bar' ? validateTargetBar(a.datasetIndex, a.index) : validateTargetPie(a.datasetIndex, a.index);
+
+            // Fallback for bar: choose closest non-zero segment in same index
+            if (!target && type === 'bar') {
                 const idx = a.index; let best = null;
                 for (let d = 0; d < chart.data.datasets.length; d++) {
-                    const cand = validateTarget(d, idx); if (!cand) continue;
+                    const cand = validateTargetBar(d, idx); if (!cand) continue;
                     const dist = Math.abs((event.y ?? 0) - (Math.min(cand.props.y, cand.props.base) + Math.abs(cand.props.height)/2));
                     if (!best || dist < best.dist) best = { ds: d, ...cand, dist };
                 }
@@ -275,10 +288,10 @@ const ChartRenderer = {
             if (!target) { hideTip(); return; }
 
             const tip = ensureTip();
-            const id = `${a.datasetIndex}:${a.index}`;
+            const id = `${a.datasetIndex}:${a.index}:${type}`;
             const changed = id !== mt.prevId;
 
-            // Text color derivation
+            // Derive text color from bg
             const deriveTextColor = (hex) => {
                 if (!hex || typeof hex !== 'string') return '#0f172a';
                 if (hex.startsWith('rgb')) return '#0f172a';
@@ -294,22 +307,38 @@ const ChartRenderer = {
                 const hue2rgb = (p,q,t)=>{ if(t<0) t+=1; if(t>1) t-=1; if(t<1/6) return p+(q-p)*6*t; if(t<1/2) return q; if(t<2/3) return p+(q-p)*(2/3 - t)*6; return p; };
                 let r2,g2,b2; if(s2===0){ r2=g2=b2=l2; } else { const q = l2 < .5 ? l2 * (1+s2) : l2 + s2 - l2*s2; const p = 2*l2 - q; r2 = hue2rgb(p,q,h+1/3); g2 = hue2rgb(p,q,h); b2 = hue2rgb(p,q,h-1/3);} return `rgb(${Math.round(r2*255)},${Math.round(g2*255)},${Math.round(b2*255)})`; };
 
-            const dsColor = chart.data.datasets[a.datasetIndex].backgroundColor;
-            // Set both colors BEFORE any layout reads to keep transitions in sync
+            const dsColor = getBgColor(chart, a.datasetIndex, a.index);
             tip.style.backgroundColor = dsColor;
             if (tip._arrow && tip._arrow.poly) tip._arrow.poly.style.fill = dsColor;
-
             const textColor = deriveTextColor(dsColor);
             const txt = tip.querySelector('.txt'); const cb = tip.querySelector('.cb'); if (txt) txt.style.color = textColor; if (cb) cb.style.background = textColor;
-            const hours = target.value; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60); if (txt) txt.textContent = `${chart.data.datasets[a.datasetIndex].label}: ${h}h ${mins}m`;
 
-            // Position (reads layout after colors are set)
-            const props = target.props;
-            const segmentLeft = props.x - props.width / 2; const topY = Math.min(props.y, props.base); const centerY = topY + Math.abs(props.height)/2;
-            const gap = 8; const tipWidth = tip.offsetWidth || 0; const left = segmentLeft - gap - tipWidth;
-            tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(centerY)}px`;
+            // Content
+            // For bar: dataset label is the type name. For pie: use label without trailing percentage if present.
+            let labelText = chart.config.type === 'bar' ? chart.data.datasets[a.datasetIndex].label : (chart.data.labels && chart.data.labels[a.index] ? String(chart.data.labels[a.index]) : '');
+            if (chart.config.type === 'pie' && labelText.includes('(')) {
+                labelText = labelText.split('(')[0].trim();
+            }
+            const hours = target.value; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60);
+            if (txt) txt.textContent = `${labelText}: ${h}h ${mins}m`;
 
-            // Arrow geometry update without recreating elements
+            // Position
+            if (type === 'bar') {
+                const props = target.props;
+                const segmentLeft = props.x - props.width / 2; const topY = Math.min(props.y, props.base); const centerY = topY + Math.abs(props.height)/2;
+                const gap = 8; const tipWidth = tip.offsetWidth || 0; const left = segmentLeft - gap - tipWidth;
+                tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(centerY)}px`;
+            } else {
+                const props = target.props;
+                const midAngle = (props.startAngle + props.endAngle) / 2;
+                const r = (props.innerRadius + props.outerRadius) / 2;
+                const cx = props.x + Math.cos(midAngle) * r;
+                const cy = props.y + Math.sin(midAngle) * r;
+                const gap = 8; const tipWidth = tip.offsetWidth || 0; const left = cx - gap - tipWidth;
+                tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(cy)}px`;
+            }
+
+            // Arrow geometry update
             if (tip._arrow) {
                 const arrowWidth = tip._arrow.width;
                 const arrowHeight = tip.offsetHeight;
