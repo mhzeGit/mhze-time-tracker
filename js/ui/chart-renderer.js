@@ -3,6 +3,66 @@
  * Handles rendering of pie chart and time graph using Chart.js
  */
 const ChartRenderer = {
+    // --- color utilities for hover effects ---
+    _parseColorToRgb(col) {
+        if (!col) return { r: 0, g: 0, b: 0 };
+        if (typeof col !== 'string') return { r: 0, g: 0, b: 0 };
+        let c = col.trim();
+        if (c.startsWith('#')) {
+            c = c.slice(1);
+            if (c.length === 3) c = c.split('').map(ch => ch + ch).join('');
+            const r = parseInt(c.slice(0, 2), 16);
+            const g = parseInt(c.slice(2, 4), 16);
+            const b = parseInt(c.slice(4, 6), 16);
+            return { r, g, b };
+        }
+        const m = c.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+        if (m) return { r: +m[1], g: +m[2], b: +m[3] };
+        return { r: 0, g: 0, b: 0 };
+    },
+    _rgbToHsl({ r, g, b }) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s; const l = (max + min) / 2;
+        if (max === min) { h = 0; s = 0; }
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; default: h = (r - g) / d + 4; }
+            h /= 6;
+        }
+        return { h, s, l };
+    },
+    _hslToRgb({ h, s, l }) {
+        const hue2rgb = (p, q, t) => { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1 / 6) return p + (q - p) * 6 * t; if (t < 1 / 2) return q; if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; return p; };
+        let r, g, b;
+        if (s === 0) { r = g = b = l; }
+        else {
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+        }
+        return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    },
+    _lightenDesaturate(col, deltaL = 0.25, reduceS = 0.2) {
+        const rgb = this._parseColorToRgb(col);
+        let { h, s, l } = this._rgbToHsl(rgb);
+        s = Math.max(0, s - reduceS);
+        l = Math.min(1, l + deltaL);
+        const out = this._hslToRgb({ h, s, l });
+        return `rgb(${out.r}, ${out.g}, ${out.b})`;
+    },
+    _hoverBgFromContext(ctx) {
+        const ds = ctx.dataset;
+        const bg = ds && ds.backgroundColor;
+        let base;
+        if (Array.isArray(bg)) base = bg[ctx.dataIndex % bg.length]; else base = bg;
+        // Soften the hover effect: less lightening and desaturation
+        return this._lightenDesaturate(base, 0.14, 0.12);
+    },
+
     /**
      * Render pie chart showing type distribution
      */
@@ -55,7 +115,10 @@ const ChartRenderer = {
                     data: data,
                     backgroundColor: colors,
                     borderColor: '#1e293b',
-                    borderWidth: 2
+                    borderWidth: 2,
+                    hoverBackgroundColor: (ctx) => ChartRenderer._hoverBgFromContext(ctx),
+                    hoverBorderColor: 'rgba(255,255,255,0.45)',
+                    hoverBorderWidth: 1
                 }]
             },
             options: {
@@ -64,6 +127,9 @@ const ChartRenderer = {
                 interaction: {
                     mode: 'nearest',
                     intersect: true
+                },
+                transitions: {
+                    active: { animation: { duration: 180, easing: 'easeOutCubic' } }
                 },
                 plugins: {
                     legend: {
@@ -125,7 +191,10 @@ const ChartRenderer = {
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
                 backgroundColor: type.color,
                 borderColor: type.color,
-                borderWidth: 0
+                borderWidth: 0,
+                hoverBackgroundColor: (ctx) => ChartRenderer._hoverBgFromContext(ctx),
+                hoverBorderColor: 'rgba(255,255,255,0.45)',
+                hoverBorderWidth: 1
             }));
 
         } else if (view === 'week') {
@@ -136,7 +205,10 @@ const ChartRenderer = {
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
                 backgroundColor: type.color,
                 borderColor: type.color,
-                borderWidth: 0
+                borderWidth: 0,
+                hoverBackgroundColor: (ctx) => ChartRenderer._hoverBgFromContext(ctx),
+                hoverBorderColor: 'rgba(255,255,255,0.45)',
+                hoverBorderWidth: 1
             }));
 
         } else if (view === 'month') {
@@ -151,7 +223,10 @@ const ChartRenderer = {
                 data: data.map(d => (d.byType[type.id] || 0) / 60),
                 backgroundColor: type.color,
                 borderColor: type.color,
-                borderWidth: 0
+                borderWidth: 0,
+                hoverBackgroundColor: (ctx) => ChartRenderer._hoverBgFromContext(ctx),
+                hoverBorderColor: 'rgba(255,255,255,0.45)',
+                hoverBorderWidth: 1
             }));
         }
 
@@ -455,6 +530,9 @@ const ChartRenderer = {
             interaction: {
                 mode: 'nearest',
                 intersect: false // allow hover detection in gaps between bars (full-width collider)
+            },
+            transitions: {
+                active: { animation: { duration: 180, easing: 'easeOutCubic' } }
             },
             plugins: {
                 legend: {
