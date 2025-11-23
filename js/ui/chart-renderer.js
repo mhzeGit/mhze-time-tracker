@@ -191,7 +191,6 @@ const ChartRenderer = {
             const container = document.createElement('div');
             Object.assign(container.style, { position: 'absolute', left: '0', top: '0', width: '100%', height: '100%', pointerEvents: 'none', zIndex: '10', overflow: 'visible' });
             parent.appendChild(container);
-            // Single reusable tooltip element (created lazily)
             chart.$multiTooltip = { container, tip: null, prevId: null };
         },
         afterEvent(chart, args) {
@@ -227,8 +226,8 @@ const ChartRenderer = {
                 const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('width', `${arrowWidth}`); svg.setAttribute('height', `${arrowHeight}`); svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`); svg.style.display = 'block';
                 const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
                 poly.setAttribute('points', `${arrowWidth},${arrowHeight/2} 0,0 0,${arrowHeight}`);
-                poly.setAttribute('fill', '#000');
-                // Match color transition with tooltip background-color
+                // Transition fill via style so CSS transition applies reliably
+                poly.style.fill = '#000';
                 poly.style.transition = 'fill .25s ease';
                 svg.appendChild(poly);
                 arrowWrapper.appendChild(svg);
@@ -296,19 +295,21 @@ const ChartRenderer = {
                 let r2,g2,b2; if(s2===0){ r2=g2=b2=l2; } else { const q = l2 < .5 ? l2 * (1+s2) : l2 + s2 - l2*s2; const p = 2*l2 - q; r2 = hue2rgb(p,q,h+1/3); g2 = hue2rgb(p,q,h); b2 = hue2rgb(p,q,h-1/3);} return `rgb(${Math.round(r2*255)},${Math.round(g2*255)},${Math.round(b2*255)})`; };
 
             const dsColor = chart.data.datasets[a.datasetIndex].backgroundColor;
-            // Use backgroundColor (not shorthand) so the transition targets the right property
+            // Set both colors BEFORE any layout reads to keep transitions in sync
             tip.style.backgroundColor = dsColor;
+            if (tip._arrow && tip._arrow.poly) tip._arrow.poly.style.fill = dsColor;
+
             const textColor = deriveTextColor(dsColor);
             const txt = tip.querySelector('.txt'); const cb = tip.querySelector('.cb'); if (txt) txt.style.color = textColor; if (cb) cb.style.background = textColor;
             const hours = target.value; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60); if (txt) txt.textContent = `${chart.data.datasets[a.datasetIndex].label}: ${h}h ${mins}m`;
 
-            // Position
+            // Position (reads layout after colors are set)
             const props = target.props;
             const segmentLeft = props.x - props.width / 2; const topY = Math.min(props.y, props.base); const centerY = topY + Math.abs(props.height)/2;
             const gap = 8; const tipWidth = tip.offsetWidth || 0; const left = segmentLeft - gap - tipWidth;
             tip.style.left = `${Math.round(left)}px`; tip.style.top = `${Math.round(centerY)}px`;
 
-            // Arrow update (right pointing) without recreating elements
+            // Arrow geometry update without recreating elements
             if (tip._arrow) {
                 const arrowWidth = tip._arrow.width;
                 const arrowHeight = tip.offsetHeight;
@@ -319,7 +320,6 @@ const ChartRenderer = {
                 svg.setAttribute('height', `${arrowHeight}`);
                 svg.setAttribute('viewBox', `0 0 ${arrowWidth} ${arrowHeight}`);
                 poly.setAttribute('points', `${arrowWidth},${arrowHeight/2} 0,0 0,${arrowHeight}`);
-                poly.setAttribute('fill', dsColor);
             }
 
             // Animate appearance / change
