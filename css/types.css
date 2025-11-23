@@ -1,0 +1,13 @@
+/* Type management */
+.type-management { max-width: 100%; margin-top: 0; overflow: hidden; }
+.type-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+.type-list::-webkit-scrollbar { width: 6px; }
+.type-list::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 3px; }
+.type-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+.type-list::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+.type-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 8px; transition: border-color 0.2s; }
+.type-item:hover { border-color: var(--accent-primary); background: var(--bg-hover); }
+.type-color-indicator { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; border: 1px solid var(--border-strong); }
+
+.type-actions { display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }

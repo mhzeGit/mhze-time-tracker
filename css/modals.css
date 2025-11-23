@@ -1,0 +1,8 @@
+/* Modals */
+.modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal.active { display: flex; }
+.modal-content { background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); }
+.modal-header h2 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.close-btn { background: none; border: none; color: var(--text-muted); font-size: 28px; line-height: 1; cursor: pointer; padding: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.15s; touch-action: manipulation; }
+.close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }

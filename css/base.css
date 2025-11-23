@@ -1,0 +1,70 @@
+:root {
+    /* === BACKGROUNDS === */
+    --bg-primary: #0d0d0d;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #262626;
+    --bg-hover: #2d2d2d;
+    --bg-active: #333333;
+    
+    /* === TEXT === */
+    --text-primary: #e8e8e8;
+    --text-secondary: #b3b3b3;
+    --text-muted: #808080;
+    --text-inverse: #0d0d0d;
+    
+    /* === BORDERS & DIVIDERS === */
+    --border-subtle: #2d2d2d;
+    --border-default: #404040;
+    --border-strong: #595959;
+    
+    /* === ACCENTS === */
+    --accent-primary: #5b9bd5;
+    --accent-primary-hover: #7ab3e0;
+    --accent-primary-active: #4a8bc4;
+    --accent-success: #6baa75;
+    --accent-warning: #d9a85c;
+    --accent-danger: #c75c5c;
+    
+    /* === UI ELEMENTS === */
+    --input-bg: #1a1a1a;
+    --input-border: #404040;
+    --input-focus-border: #5b9bd5;
+    --button-bg: #262626;
+    --button-border: #404040;
+    --button-hover-bg: #2d2d2d;
+    --scrollbar-track: #1a1a1a;
+    --scrollbar-thumb: #404040;
+    --scrollbar-thumb-hover: #4d4d4d;
+    
+    /* === SHADOWS === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    
+    /* === CHART COLORS === */
+    --chart-1: #5b9bd5;
+    --chart-2: #6baa75;
+    --chart-3: #d9a85c;
+    --chart-4: #9d7ab8;
+    --chart-5: #c75c5c;
+    --chart-6: #5da3a3;
+}
+
+/* === BASE STYLES === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 
+                 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}

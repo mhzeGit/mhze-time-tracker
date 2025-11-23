@@ -1,0 +1,91 @@
+/* Layout */
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.top-bar {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-default);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.top-bar h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.top-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 350px 1fr 1fr;
+    grid-template-rows: auto minmax(500px, auto) minmax(400px, auto);
+    gap: 20px;
+    grid-template-areas:
+        "filters filters filters"
+        "sidebar main-top main-top"
+        "types analytics analytics";
+    align-items: stretch;
+}
+
+.filters-section { grid-area: filters; }
+.summary-section { grid-area: sidebar; display: flex; flex-direction: column; }
+.entries-section { grid-area: main-top; display: flex; flex-direction: column; }
+.analytics-section { grid-area: analytics; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.type-management { grid-area: types; display: flex; flex-direction: column; }
+
+section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+section h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.section-header h2 { margin: 0; }
+
+/* Summary */
+.summary-section { position: relative; align-self: start; }
+.summary-cards { display: flex; flex-direction: column; gap: 16px; }
+.summary-card { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 20px; transition: border-color 0.2s; }
+.summary-card:hover { border-color: var(--border-default); }
+.summary-card h3 { font-size: 13px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.summary-value { font-size: 28px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
