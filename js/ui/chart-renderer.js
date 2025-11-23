@@ -104,7 +104,6 @@ const ChartRenderer = {
         const data = Analytics.getTimeGraphData(view);
 
         if (!data || data.length === 0) {
-            // Show empty state
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#64748b';
             ctx.font = '14px sans-serif';
@@ -161,12 +160,9 @@ const ChartRenderer = {
 
         App.charts.timeGraph = new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: this.getStackedBarOptions(view, suggestedMax),
-            plugins: [this.multiTooltipPlugin]
+            data: { labels, datasets },
+            options: { ...this.getStackedBarOptions(view, suggestedMax), layout: { padding: { top: 40 } } },
+            plugins: [this.multiTooltipPlugin, this.stackTotalsPlugin]
         });
     },
 
@@ -362,6 +358,55 @@ const ChartRenderer = {
             mt.prevId = id;
         },
         afterDestroy(chart) { const mt = chart.$multiTooltip; if (mt && mt.container && mt.container.parentNode) mt.container.parentNode.removeChild(mt.container); chart.$multiTooltip = null; }
+    },
+
+    // Plugin to draw total hours above each stacked bar in time graph
+    stackTotalsPlugin: {
+        id: 'stackTotalsPlugin',
+        afterDatasetsDraw(chart) {
+            if (chart.config.type !== 'bar') return;
+            const ctx = chart.ctx;
+            const datasets = chart.data.datasets;
+            if (!datasets || datasets.length === 0) return;
+            const meta0 = chart.getDatasetMeta(0); if (!meta0 || !meta0.data) return;
+
+            // Only show for the bar currently hovered
+            const actives = chart.getActiveElements();
+            if (!actives || actives.length === 0) return;
+            const activeIndex = actives[0].index;
+            if (typeof activeIndex !== 'number') return;
+
+            const isMobile = chart.width <= 500;
+            const fontSize = isMobile ? 9 : 11;
+            const chartTop = chart.chartArea && Number.isFinite(chart.chartArea.top) ? chart.chartArea.top : 0;
+            const yRow = chartTop - 6; // outside plot area, just above top boundary
+
+            // Compute total and x position for the active bar index
+            let total = 0;
+            let xPos = null;
+            for (let d = 0; d < datasets.length; d++) {
+                const meta = chart.getDatasetMeta(d); if (!meta || !meta.data || !meta.data[activeIndex]) continue;
+                const el = meta.data[activeIndex];
+                const val = datasets[d].data[activeIndex];
+                if (typeof val === 'number' && val > 0) total += val;
+                if (xPos == null) {
+                    const props = el.getProps(['x'], true);
+                    if (props) xPos = props.x;
+                }
+            }
+            if (xPos == null || total <= 0) return;
+
+            const hours = total; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60);
+            const label = `${h}h${mins>0?` ${mins}m`:''}`;
+
+            ctx.save();
+            ctx.font = `${fontSize}px sans-serif`;
+            ctx.fillStyle = '#cbd5e1';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(label, xPos, yRow);
+            ctx.restore();
+        }
     },
 
     /**
