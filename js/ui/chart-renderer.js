@@ -399,12 +399,40 @@ const ChartRenderer = {
             const hours = total; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60);
             const label = `${h}h${mins>0?` ${mins}m`:''}`;
 
+            // Draw a simple rounded rectangle with text
             ctx.save();
             ctx.font = `${fontSize}px sans-serif`;
+            const textWidth = Math.ceil(ctx.measureText(label).width);
+            const padX = 6; const padY = 3;
+            const boxW = textWidth + padX * 2;
+            const boxH = fontSize + padY * 2;
+            const xLeft = Math.round(xPos - boxW / 2);
+            const yTop = Math.round(yRow - boxH);
+            const radius = Math.min(6, boxH / 2);
+
+            // Background
+            ctx.beginPath();
+            ctx.moveTo(xLeft + radius, yTop);
+            ctx.lineTo(xLeft + boxW - radius, yTop);
+            ctx.quadraticCurveTo(xLeft + boxW, yTop, xLeft + boxW, yTop + radius);
+            ctx.lineTo(xLeft + boxW, yTop + boxH - radius);
+            ctx.quadraticCurveTo(xLeft + boxW, yTop + boxH, xLeft + boxW - radius, yTop + boxH);
+            ctx.lineTo(xLeft + radius, yTop + boxH);
+            ctx.quadraticCurveTo(xLeft, yTop + boxH, xLeft, yTop + boxH - radius);
+            ctx.lineTo(xLeft, yTop + radius);
+            ctx.quadraticCurveTo(xLeft, yTop, xLeft + radius, yTop);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(44, 48, 56, 0.5)'; // desaturated dark background
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#334155'; // subtle border
+            ctx.stroke();
+
+            // Text
             ctx.fillStyle = '#cbd5e1';
             ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText(label, xPos, yRow);
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, Math.round(xPos), Math.round(yTop + boxH / 2));
             ctx.restore();
         }
     },
