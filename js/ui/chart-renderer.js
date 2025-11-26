@@ -435,7 +435,7 @@ const ChartRenderer = {
         afterDestroy(chart) { const mt = chart.$multiTooltip; if (mt && mt.container && mt.container.parentNode) mt.container.parentNode.removeChild(mt.container); chart.$multiTooltip = null; }
     },
 
-    // Plugin to draw total hours above each stacked bar in time graph
+    // Plugin to draw total hours above each stacked bar in time graph and average line
     stackTotalsPlugin: {
         id: 'stackTotalsPlugin',
         afterDatasetsDraw(chart) {
@@ -447,67 +447,91 @@ const ChartRenderer = {
 
             // Only show for the bar currently hovered
             const actives = chart.getActiveElements();
-            if (!actives || actives.length === 0) return;
-            const activeIndex = actives[0].index;
-            if (typeof activeIndex !== 'number') return;
+            if (actives && actives.length > 0) {
+                const activeIndex = actives[0].index;
+                if (typeof activeIndex === 'number') {
+                    const isMobile = chart.width <= 500;
+                    const fontSize = isMobile ? 9 : 11;
+                    const chartTop = chart.chartArea && Number.isFinite(chart.chartArea.top) ? chart.chartArea.top : 0;
+                    const yRow = chartTop - 6; // outside plot area, just above top boundary
 
-            const isMobile = chart.width <= 500;
-            const fontSize = isMobile ? 9 : 11;
-            const chartTop = chart.chartArea && Number.isFinite(chart.chartArea.top) ? chart.chartArea.top : 0;
-            const yRow = chartTop - 6; // outside plot area, just above top boundary
+                    // Compute total and x position for the active bar index
+                    let total = 0;
+                    let xPos = null;
+                    for (let d = 0; d < datasets.length; d++) {
+                        const meta = chart.getDatasetMeta(d); if (!meta || !meta.data || !meta.data[activeIndex]) continue;
+                        const el = meta.data[activeIndex];
+                        const val = datasets[d].data[activeIndex];
+                        if (typeof val === 'number' && val > 0) total += val;
+                        if (xPos == null) {
+                            const props = el.getProps(['x'], true);
+                            if (props) xPos = props.x;
+                        }
+                    }
+                    if (xPos != null && total > 0) {
+                        const hours = total; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60);
+                        const label = `${h}h${mins>0?` ${mins}m`:''}`;
 
-            // Compute total and x position for the active bar index
-            let total = 0;
-            let xPos = null;
-            for (let d = 0; d < datasets.length; d++) {
-                const meta = chart.getDatasetMeta(d); if (!meta || !meta.data || !meta.data[activeIndex]) continue;
-                const el = meta.data[activeIndex];
-                const val = datasets[d].data[activeIndex];
-                if (typeof val === 'number' && val > 0) total += val;
-                if (xPos == null) {
-                    const props = el.getProps(['x'], true);
-                    if (props) xPos = props.x;
+                        // Draw a simple rounded rectangle with text
+                        ctx.save();
+                        ctx.font = `${fontSize}px sans-serif`;
+                        const textWidth = Math.ceil(ctx.measureText(label).width);
+                        const padX = 6; const padY = 3;
+                        const boxW = textWidth + padX * 2;
+                        const boxH = fontSize + padY * 2;
+                        const xLeft = Math.round(xPos - boxW / 2);
+                        const yTop = Math.round(yRow - boxH);
+                        const radius = Math.min(6, boxH / 2);
+
+                        // Background
+                        ctx.beginPath();
+                        ctx.moveTo(xLeft + radius, yTop);
+                        ctx.lineTo(xLeft + boxW - radius, yTop);
+                        ctx.quadraticCurveTo(xLeft + boxW, yTop, xLeft + boxW, yTop + radius);
+                        ctx.lineTo(xLeft + boxW, yTop + boxH - radius);
+                        ctx.quadraticCurveTo(xLeft + boxW, yTop + boxH, xLeft + boxW - radius, yTop + boxH);
+                        ctx.lineTo(xLeft + radius, yTop + boxH);
+                        ctx.quadraticCurveTo(xLeft, yTop + boxH, xLeft, yTop + boxH - radius);
+                        ctx.lineTo(xLeft, yTop + radius);
+                        ctx.quadraticCurveTo(xLeft, yTop, xLeft + radius, yTop);
+                        ctx.closePath();
+                        ctx.fillStyle = 'rgba(44, 48, 56, 0.5)'; // desaturated dark background
+                        ctx.fill();
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = '#334155'; // subtle border
+                        ctx.stroke();
+
+                        // Text
+                        ctx.fillStyle = '#cbd5e1';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(label, Math.round(xPos), Math.round(yTop + boxH / 2));
+                        ctx.restore();
+                    }
                 }
             }
-            if (xPos == null || total <= 0) return;
 
-            const hours = total; const h = Math.floor(hours); const mins = Math.round((hours - h) * 60);
-            const label = `${h}h${mins>0?` ${mins}m`:''}`;
+            // Draw average line
+            const totalValues = datasets.reduce((acc, ds) => {
+                ds.data.forEach((value, index) => {
+                    acc[index] = (acc[index] || 0) + value;
+                });
+                return acc;
+            }, []);
 
-            // Draw a simple rounded rectangle with text
+            const totalSum = totalValues.reduce((sum, value) => sum + value, 0);
+            const average = totalSum / totalValues.length;
+
+            const chartArea = chart.chartArea;
+            const yPosition = chart.scales.y.getPixelForValue(average);
+
             ctx.save();
-            ctx.font = `${fontSize}px sans-serif`;
-            const textWidth = Math.ceil(ctx.measureText(label).width);
-            const padX = 6; const padY = 3;
-            const boxW = textWidth + padX * 2;
-            const boxH = fontSize + padY * 2;
-            const xLeft = Math.round(xPos - boxW / 2);
-            const yTop = Math.round(yRow - boxH);
-            const radius = Math.min(6, boxH / 2);
-
-            // Background
             ctx.beginPath();
-            ctx.moveTo(xLeft + radius, yTop);
-            ctx.lineTo(xLeft + boxW - radius, yTop);
-            ctx.quadraticCurveTo(xLeft + boxW, yTop, xLeft + boxW, yTop + radius);
-            ctx.lineTo(xLeft + boxW, yTop + boxH - radius);
-            ctx.quadraticCurveTo(xLeft + boxW, yTop + boxH, xLeft + boxW - radius, yTop + boxH);
-            ctx.lineTo(xLeft + radius, yTop + boxH);
-            ctx.quadraticCurveTo(xLeft, yTop + boxH, xLeft, yTop + boxH - radius);
-            ctx.lineTo(xLeft, yTop + radius);
-            ctx.quadraticCurveTo(xLeft, yTop, xLeft + radius, yTop);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(44, 48, 56, 0.5)'; // desaturated dark background
-            ctx.fill();
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = '#334155'; // subtle border
+            ctx.moveTo(chartArea.left, yPosition);
+            ctx.lineTo(chartArea.right, yPosition);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgb(60, 70, 120,0.8)'; // sky blue, slightly transparent
             ctx.stroke();
-
-            // Text
-            ctx.fillStyle = '#cbd5e1';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, Math.round(xPos), Math.round(yTop + boxH / 2));
             ctx.restore();
         }
     },
