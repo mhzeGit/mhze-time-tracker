@@ -44,6 +44,11 @@ const EventListeners = {
      * Setup top bar buttons
      */
     setupTopBarButtons() {
+        if (typeof ModalManager === 'undefined') {
+            console.error('ModalManager is not defined. Ensure the script is loaded correctly.');
+            return;
+        }
+
         document.getElementById('loadDataBtn').addEventListener('click', () => {
             DataManager.loadData();
         });
@@ -190,6 +195,28 @@ const EventListeners = {
          * Setup task type dropdown in the "Add Task" modal
          */
         this.setupTaskTypeDropdown();
+
+        const durationDisplay = document.getElementById('durationDisplay');
+        durationDisplay.addEventListener('input', () => {
+            const startTime = document.getElementById('taskStartTime').value;
+            const durationText = durationDisplay.textContent;
+
+            // Parse duration text (e.g., "1h 30m") into minutes
+            const durationMatch = durationText.match(/(\d+)h\s*(\d+)?m?/);
+            if (startTime && durationMatch) {
+                const hours = parseInt(durationMatch[1], 10) || 0;
+                const minutes = parseInt(durationMatch[2], 10) || 0;
+                const totalMinutes = hours * 60 + minutes;
+
+                const [startHour, startMinute] = startTime.split(':').map(Number);
+                const startDate = new Date();
+                startDate.setHours(startHour, startMinute, 0, 0);
+
+                const endDate = new Date(startDate.getTime() + totalMinutes * 60000); // Add duration in milliseconds
+                const endTime = endDate.toTimeString().slice(0, 5);
+                document.getElementById('taskEndTime').value = endTime;
+            }
+        });
     },
 
     /**
