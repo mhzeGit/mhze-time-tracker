@@ -164,10 +164,6 @@ const EventListeners = {
             ModalManager.closeModal();
         });
         
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            ModalManager.closeModal();
-        });
-        
         document.getElementById('taskModal').addEventListener('click', (e) => {
             if (e.target.id === 'taskModal') {
                 ModalManager.closeModal();

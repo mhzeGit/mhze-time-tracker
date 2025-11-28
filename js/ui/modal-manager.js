@@ -43,8 +43,8 @@ const ModalManager = {
             const startTime = now.toTimeString().slice(0, 5);
             taskStartTime.value = startTime;
 
-            // Set default end time to 1 hour after start time
-            now.setHours(now.getHours() + 1);
+            // Set default end time to 30 minutes after start time
+            now.setMinutes(now.getMinutes() + 30);
             const endTime = now.toTimeString().slice(0, 5);
             taskEndTime.value = endTime;
 
