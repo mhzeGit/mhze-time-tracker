@@ -74,19 +74,63 @@ const UIRenderer = {
     },
 
     /**
-     * Update type dropdown in task modal
+     * Update type dropdown in task modal to use custom select
      */
     updateTypeDropdown() {
-        const select = document.getElementById('taskType');
-        const currentValue = select.value;
-        
-        select.innerHTML = '<option value="">Select a type...</option>' +
-            App.data.types.map(type => 
-                `<option value="${type.id}">${Helpers.escapeHtml(type.name)}</option>`
-            ).join('');
-        
-        if (currentValue && App.data.types.find(t => t.id === currentValue)) {
-            select.value = currentValue;
+        const customSelect = document.getElementById('taskType');
+        if (!customSelect) return;
+
+        const dropdown = customSelect.querySelector('.custom-select-dropdown');
+        const trigger = customSelect.querySelector('.custom-select-trigger .selected-text');
+
+        if (!dropdown || !trigger) return;
+
+        const currentValue = App.editingId ? App.data.entries.find(e => e.id === App.editingId)?.typeId : '';
+
+        // Clear existing options (keep "Select a type...")
+        dropdown.innerHTML = `
+            <div class="custom-option" data-value="">
+                <span class="option-text">Select a type...</span>
+            </div>
+        `;
+
+        // Add type options with colored indicators
+        App.data.types.forEach(type => {
+            const option = document.createElement('div');
+            option.className = 'custom-option';
+            option.dataset.value = type.id;
+
+            const typeName = Helpers.escapeHtml(type.name);
+
+            option.innerHTML = `
+                <span class="option-color-dot" style="background-color: ${type.color};"></span>
+                <span class="option-text">${typeName}</span>
+            `;
+
+            dropdown.appendChild(option);
+        });
+
+        // Update trigger text based on current selection
+        if (currentValue) {
+            const selectedType = App.data.types.find(t => t.id === currentValue);
+            if (selectedType) {
+                trigger.textContent = selectedType.name;
+
+                // Update selected state
+                dropdown.querySelectorAll('.custom-option').forEach(opt => {
+                    if (opt.dataset.value === currentValue) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+            } else {
+                trigger.textContent = 'Select a type...';
+                dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
+            }
+        } else {
+            trigger.textContent = 'Select a type...';
+            dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
         }
     },
 

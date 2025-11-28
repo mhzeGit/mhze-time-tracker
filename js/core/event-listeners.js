@@ -185,6 +185,52 @@ const EventListeners = {
         document.getElementById('taskEndTime').addEventListener('change', () => {
             ModalManager.updateDurationDisplay();
         });
+
+        /**
+         * Setup task type dropdown in the "Add Task" modal
+         */
+        this.setupTaskTypeDropdown();
+    },
+
+    /**
+     * Setup task type dropdown in the "Add Task" modal
+     */
+    setupTaskTypeDropdown() {
+        const taskTypeSelect = document.getElementById('taskType');
+        const trigger = taskTypeSelect.querySelector('.custom-select-trigger');
+        const dropdown = taskTypeSelect.querySelector('.custom-select-dropdown');
+
+        // Toggle dropdown
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            taskTypeSelect.classList.toggle('open');
+        });
+
+        // Handle option selection
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.custom-option');
+            if (!option) return;
+
+            const value = option.dataset.value;
+            const text = option.querySelector('.option-text').textContent;
+
+            App.editingTaskTypeId = value;
+            trigger.querySelector('.selected-text').textContent = text;
+
+            dropdown.querySelectorAll('.custom-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            option.classList.add('selected');
+
+            taskTypeSelect.classList.remove('open');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!taskTypeSelect.contains(e.target)) {
+                taskTypeSelect.classList.remove('open');
+            }
+        });
     },
 
     /**

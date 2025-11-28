@@ -9,3 +9,15 @@ form { padding: 20px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex-wrap: nowrap; }
 .duration-display { padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--accent-primary); font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; min-height: 44px; display: flex; align-items: center; }
 .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); flex-wrap: wrap; }
+/* Updated styles for icons in input fields */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator,
+.form-group input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(70%) sepia(20%) saturate(500%) hue-rotate(180deg) brightness(90%) contrast(85%);
+    cursor: pointer;
+}
+
+/* Ensure custom dropdowns are displayed over everything */
+.custom-select-dropdown {
+    position: absolute;
+    z-index: 1000; /* High z-index to ensure visibility over other elements */
+}
