@@ -14,7 +14,20 @@ const ModalManager = {
         document.getElementById('taskDate').valueAsDate = new Date();
         document.getElementById('modalTitle').textContent = 'Add Task';
 
-        // Ensure modal is visible before accessing elements
+        // Populate recent titles
+        const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
+        const titleInput = document.getElementById('taskTitle');
+        titleInput.setAttribute('list', 'recentTitlesList');
+
+        let dataList = document.getElementById('recentTitlesList');
+        if (!dataList) {
+            dataList = document.createElement('datalist');
+            dataList.id = 'recentTitlesList';
+            document.body.appendChild(dataList);
+        }
+
+        dataList.innerHTML = recentTitles.map(title => `<option value="${title}"></option>`).join('');
+
         modal.classList.add('active');
 
         // Delay accessing elements to ensure they are rendered
@@ -203,6 +216,18 @@ const ModalManager = {
             alert('End time must be after start time!');
             return;
         }
+
+        // Save recent titles
+        const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
+        const titleIndex = recentTitles.indexOf(formData.title);
+        if (titleIndex !== -1) {
+            recentTitles.splice(titleIndex, 1); // Remove existing title
+        }
+        recentTitles.unshift(formData.title); // Add to the top
+        if (recentTitles.length > 10) {
+            recentTitles.pop(); // Limit to 10 titles
+        }
+        localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
 
         if (App.editingId) {
             EntryManager.updateEntry(App.editingId, formData);
