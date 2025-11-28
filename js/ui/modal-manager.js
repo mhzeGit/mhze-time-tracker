@@ -200,7 +200,7 @@ const ModalManager = {
 
         const formData = {
             title: document.getElementById('taskTitle').value,
-            typeId: document.getElementById('taskType').value,
+            typeId: document.querySelector('#taskType .custom-option.selected')?.dataset.value || '',
             date: document.getElementById('taskDate').value,
             startTime: document.getElementById('taskStartTime').value,
             endTime: document.getElementById('taskEndTime').value
