@@ -14,6 +14,9 @@ const ModalManager = {
         document.getElementById('taskDate').valueAsDate = new Date();
         document.getElementById('modalTitle').textContent = 'Add Task';
 
+        // Set button text to "Add"
+        document.getElementById('submitBtn').textContent = 'Add';
+
         // Populate recent titles
         const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
         const titleInput = document.getElementById('taskTitle');
@@ -128,6 +131,9 @@ const ModalManager = {
 
         this.updateDurationDisplay();
         document.getElementById('modalTitle').textContent = 'Edit Task';
+
+        // Set button text to "Save"
+        document.getElementById('submitBtn').textContent = 'Save';
 
         App.editingId = id;
         modal.classList.add('active');
