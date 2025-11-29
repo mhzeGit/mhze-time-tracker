@@ -108,10 +108,23 @@ const ModalManager = {
         const modal = document.getElementById('taskModal');
 
         document.getElementById('taskTitle').value = entry.title;
-        document.getElementById('taskType').value = entry.typeId;
         document.getElementById('taskDate').value = entry.date;
         document.getElementById('taskStartTime').value = entry.startTime;
         document.getElementById('taskEndTime').value = entry.endTime;
+
+        // Update task type dropdown
+        const taskTypeDropdown = document.getElementById('taskType');
+        const trigger = taskTypeDropdown.querySelector('.custom-select-trigger .selected-text');
+        const options = taskTypeDropdown.querySelectorAll('.custom-option');
+
+        options.forEach(option => {
+            if (option.dataset.value === entry.typeId) {
+                option.classList.add('selected');
+                trigger.textContent = option.querySelector('.option-text').textContent;
+            } else {
+                option.classList.remove('selected');
+            }
+        });
 
         this.updateDurationDisplay();
         document.getElementById('modalTitle').textContent = 'Edit Task';
