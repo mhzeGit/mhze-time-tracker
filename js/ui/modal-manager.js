@@ -118,12 +118,17 @@ const ModalManager = {
         // Update task type dropdown
         const taskTypeDropdown = document.getElementById('taskType');
         const trigger = taskTypeDropdown.querySelector('.custom-select-trigger .selected-text');
+        const colorPreview = taskTypeDropdown.querySelector('.custom-select-trigger .color-preview');
         const options = taskTypeDropdown.querySelectorAll('.custom-option');
 
         options.forEach(option => {
             if (option.dataset.value === entry.typeId) {
                 option.classList.add('selected');
                 trigger.textContent = option.querySelector('.option-text').textContent;
+                if (colorPreview) {
+                    const selectedType = App.data.types.find(t => t.id === entry.typeId);
+                    colorPreview.style.backgroundColor = selectedType ? selectedType.color : 'transparent';
+                }
             } else {
                 option.classList.remove('selected');
             }

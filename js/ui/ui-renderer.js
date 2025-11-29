@@ -82,6 +82,7 @@ const UIRenderer = {
 
         const dropdown = customSelect.querySelector('.custom-select-dropdown');
         const trigger = customSelect.querySelector('.custom-select-trigger .selected-text');
+        let colorPreview = customSelect.querySelector('.custom-select-trigger .color-preview');
 
         if (!dropdown || !trigger) return;
 
@@ -110,11 +111,14 @@ const UIRenderer = {
             dropdown.appendChild(option);
         });
 
-        // Update trigger text based on current selection
+        // Update trigger text and color preview based on current selection
         if (currentValue) {
             const selectedType = App.data.types.find(t => t.id === currentValue);
             if (selectedType) {
                 trigger.textContent = selectedType.name;
+                if (colorPreview) {
+                    colorPreview.style.backgroundColor = selectedType.color;
+                }
 
                 // Update selected state
                 dropdown.querySelectorAll('.custom-option').forEach(opt => {
@@ -126,12 +130,57 @@ const UIRenderer = {
                 });
             } else {
                 trigger.textContent = 'Select a type...';
+                if (colorPreview) {
+                    colorPreview.style.backgroundColor = 'transparent';
+                }
                 dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
             }
         } else {
             trigger.textContent = 'Select a type...';
+            if (colorPreview) {
+                colorPreview.style.backgroundColor = 'transparent';
+            }
             dropdown.querySelector('.custom-option[data-value=""]')?.classList.add('selected');
         }
+
+        // Append color preview to trigger if not already present
+        const triggerContainer = customSelect.querySelector('.custom-select-trigger');
+        if (triggerContainer && !colorPreview) {
+            colorPreview = document.createElement('span');
+            colorPreview.className = 'color-preview';
+            triggerContainer.insertBefore(colorPreview, trigger);
+        }
+
+        // Add event listener to update color preview on selection
+        dropdown.addEventListener('click', (e) => {
+            const option = e.target.closest('.custom-option');
+            if (!option) return;
+
+            const selectedValue = option.dataset.value;
+            const selectedType = App.data.types.find(t => t.id === selectedValue);
+
+            if (selectedType) {
+                trigger.textContent = selectedType.name;
+                if (colorPreview) {
+                    colorPreview.style.backgroundColor = selectedType.color;
+                }
+            } else {
+                trigger.textContent = 'Select a type...';
+                if (colorPreview) {
+                    colorPreview.style.backgroundColor = 'transparent';
+                }
+            }
+
+            dropdown.querySelectorAll('.custom-option').forEach(opt => {
+                if (opt.dataset.value === selectedValue) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+
+            customSelect.classList.remove('open');
+        });
     },
 
     /**

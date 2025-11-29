@@ -35,6 +35,13 @@
 .selected-text { flex: 1; }
 .select-arrow { font-size: 10px; color: var(--text-secondary); transition: transform 0.2s; }
 .custom-select.open .select-arrow { transform: rotate(180deg); }
+.custom-select-trigger .color-preview {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
 .custom-select-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: 8px; box-shadow: var(--shadow-md); max-height: 300px; overflow-y: auto; z-index: 1000; display: none; }
 .custom-select.open .custom-select-dropdown { display: block; }
 .custom-option { display: flex; align-items: center; gap: 10px; padding: 12px; cursor: pointer; transition: background 0.15s; color: var(--text-primary); font-size: 14px; min-height: 44px; }
