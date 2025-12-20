@@ -18,14 +18,23 @@ function initApp() {
     const signInBtn = document.getElementById('oneDriveSignInBtn');
     const signOutBtn = document.getElementById('oneDriveSignOutBtn');
     
+    console.log('OneDrive buttons found:', { signInBtn: !!signInBtn, signOutBtn: !!signOutBtn });
+    
     if (signInBtn) {
-        signInBtn.addEventListener('click', () => OneDriveSync.signIn());
+        signInBtn.addEventListener('click', () => {
+            console.log('Sign in button clicked');
+            OneDriveSync.signIn();
+        });
     }
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', () => OneDriveSync.signOut());
+        signOutBtn.addEventListener('click', () => {
+            console.log('Sign out button clicked');
+            OneDriveSync.signOut();
+        });
     }
     
     // Initialize OneDrive sync
+    console.log('OneDriveSync defined:', typeof OneDriveSync !== 'undefined');
     if (typeof OneDriveSync !== 'undefined') {
         OneDriveSync.init();
     }

@@ -11,7 +11,7 @@ const OneDriveSync = {
         auth: {
             clientId: '569971d1-9f8c-4db3-bd24-f9efe5e07947', // Replace with your Azure AD app client ID
             authority: 'https://login.microsoftonline.com/common',
-            redirectUri: window.location.origin + window.location.pathname
+            redirectUri: 'https://mhzegit.github.io/mhze-time-tracker/'
         },
         cache: {
             cacheLocation: 'localStorage',
@@ -38,14 +38,25 @@ const OneDriveSync = {
      * Initialize MSAL and check for existing session
      */
     async init() {
+        console.log('OneDrive sync initializing...');
+        console.log('Redirect URI:', this.msalConfig.auth.redirectUri);
+        
         if (!this.msalConfig.auth.clientId || this.msalConfig.auth.clientId === 'YOUR_CLIENT_ID_HERE') {
             console.log('OneDrive sync not configured - no client ID');
             return;
         }
 
+        // Check if MSAL library is loaded
+        if (typeof msal === 'undefined') {
+            console.error('MSAL library not loaded!');
+            return;
+        }
+
         try {
+            console.log('Creating MSAL instance...');
             this.msalInstance = new msal.PublicClientApplication(this.msalConfig);
             await this.msalInstance.initialize();
+            console.log('MSAL initialized successfully');
 
             // Handle redirect response if coming back from login
             const response = await this.msalInstance.handleRedirectPromise();
@@ -70,12 +81,16 @@ const OneDriveSync = {
      * Sign in with Microsoft
      */
     async signIn() {
+        console.log('Sign in clicked');
+        
         if (!this.msalInstance) {
+            console.error('MSAL instance not available');
             Notifications.show('OneDrive sync not configured', 'error');
             return;
         }
 
         try {
+            console.log('Opening login popup...');
             // Use popup for better UX
             const response = await this.msalInstance.loginPopup({
                 scopes: this.scopes
