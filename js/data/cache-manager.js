@@ -27,6 +27,11 @@ const CacheManager = {
             localStorage.setItem(this.FILTERS_KEY, JSON.stringify(App.filters));
             
             console.log('Data cached successfully');
+            
+            // Auto-sync to OneDrive if signed in
+            if (typeof OneDriveSync !== 'undefined' && OneDriveSync.isSignedIn()) {
+                OneDriveSync.saveToOneDrive();
+            }
         } catch (error) {
             console.error('Error saving to cache:', error);
             // Handle quota exceeded or other storage errors

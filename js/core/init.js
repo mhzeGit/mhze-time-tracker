@@ -14,6 +14,22 @@ function initApp() {
     // Setup all event listeners
     EventListeners.setup();
     
+    // Setup OneDrive sign-in/sign-out buttons
+    const signInBtn = document.getElementById('oneDriveSignInBtn');
+    const signOutBtn = document.getElementById('oneDriveSignOutBtn');
+    
+    if (signInBtn) {
+        signInBtn.addEventListener('click', () => OneDriveSync.signIn());
+    }
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', () => OneDriveSync.signOut());
+    }
+    
+    // Initialize OneDrive sync
+    if (typeof OneDriveSync !== 'undefined') {
+        OneDriveSync.init();
+    }
+    
     // Render initial UI
     UIRenderer.renderAll();
     
