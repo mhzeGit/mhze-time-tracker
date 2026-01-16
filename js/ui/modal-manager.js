@@ -12,6 +12,8 @@ const ModalManager = {
 
         form.reset();
         document.getElementById('taskDate').valueAsDate = new Date();
+        document.getElementById('offDayStartDate').value = '';
+        document.getElementById('offDayEndDate').value = '';
         document.getElementById('modalTitle').textContent = 'Add Task';
         
         // Reset Off Day state
@@ -171,57 +173,69 @@ const ModalManager = {
      * Handle Off Day toggle
      */
     handleOffDayToggle(isOffDay) {
-        const titleInput = document.getElementById('taskTitle');
+        const regularFields = document.getElementById('regularTaskFields');
+        const singleDateGroup = document.getElementById('singleDateGroup');
+        const rangeDateGroup = document.getElementById('rangeDateGroup');
         const typeSelect = document.getElementById('taskType');
         const startTimeInput = document.getElementById('taskStartTime');
         const endTimeInput = document.getElementById('taskEndTime');
         const durationDisplay = document.getElementById('durationDisplay');
+        const isEditing = !!App.editingId; // Check if we are in edit mode
         
         if (isOffDay) {
-            // Disable and set default values
-            titleInput.value = 'Off Day';
-            titleInput.disabled = true;
-            
+            // Hide regular title field
+            if (regularFields) regularFields.style.display = 'none';
+
+            // Disable Type Selection
             typeSelect.classList.add('disabled');
             typeSelect.style.pointerEvents = 'none';
             typeSelect.style.opacity = '0.6';
             
-            // Set 00:00 - 00:00
+            // Set 00:00 - 00:00 & Disable
             startTimeInput.value = '00:00';
             startTimeInput.disabled = true;
-            
             endTimeInput.value = '00:00';
             endTimeInput.disabled = true;
-            
             if (durationDisplay) {
                 durationDisplay.value = '00:00';
                 durationDisplay.disabled = true;
             }
 
-            // Set visual state of dropdown to reflect system type implicitly (or clear it)
-            // Since the dropdown is disabled, user can't see the list.
-            // We can update the trigger text to "Off Day" for clarity.
+            // Visual update for dropdown trigger
             const trigger = typeSelect.querySelector('.custom-select-trigger .selected-text');
             const colorPreview = typeSelect.querySelector('.custom-select-trigger .color-preview');
             if (trigger) trigger.textContent = 'Off Day';
             if (colorPreview) colorPreview.style.backgroundColor = '#cccccc';
 
-        } else {
-            // Enable inputs
-            titleInput.disabled = false;
-            // Only clear title if it was automatic "Off Day"
-            if (titleInput.value === 'Off Day') {
-                titleInput.value = '';
+            // Date Input Logic: Range vs Single
+            if (isEditing) {
+                // Edit Mode: Keep single date
+                if (singleDateGroup) singleDateGroup.style.display = 'block';
+                if (rangeDateGroup) rangeDateGroup.style.display = 'none';
+                
+                document.getElementById('taskDate').required = true;
+                document.getElementById('offDayStartDate').required = false;
+                document.getElementById('offDayEndDate').required = false;
+            } else {
+                // Add Mode: Use Range
+                if (singleDateGroup) singleDateGroup.style.display = 'none';
+                if (rangeDateGroup) rangeDateGroup.style.display = 'flex';
+                
+                document.getElementById('taskDate').required = false;
+                document.getElementById('offDayStartDate').required = true;
+                document.getElementById('offDayEndDate').required = true;
             }
+
+        } else {
+            // Show regular fields
+            if (regularFields) regularFields.style.display = 'block';
             
+            // Enable Inputs
             typeSelect.classList.remove('disabled');
             typeSelect.style.pointerEvents = 'auto';
             typeSelect.style.opacity = '1';
             
-            // Restore previous selection if available
-            // If we are editing, we can look at entry or App.editingTaskTypeId
-            // But if we just toggled, we might have lost it.
-            // A simple reset to "Select a type..." is acceptable or re-render
+            // Restore Type Dropdown
             UIRenderer.updateTypeDropdown();
 
             startTimeInput.disabled = false;
@@ -229,10 +243,16 @@ const ModalManager = {
             
             if (durationDisplay) {
                 durationDisplay.disabled = false;
+                this.updateDurationDisplay();
             }
-            
-            // Reset duration display if we're enabling
-            this.updateDurationDisplay();
+
+            // Reset Date Inputs to Single
+            if (singleDateGroup) singleDateGroup.style.display = 'block';
+            if (rangeDateGroup) rangeDateGroup.style.display = 'none';
+
+            document.getElementById('taskDate').required = true;
+            document.getElementById('offDayStartDate').required = false;
+            document.getElementById('offDayEndDate').required = false;
         }
     },
 
@@ -252,26 +272,93 @@ const ModalManager = {
             return;
         }
 
-        const formData = {
-            title: isOffDay ? 'Off Day' : document.getElementById('taskTitle').value,
+        const titleInput = document.getElementById('taskTitle');
+        const titleValue = (isOffDay) ? 'Off Day' : titleInput.value;
+
+        // Base data structure
+        const baseData = {
+            title: titleValue,
             typeId: typeId,
-            date: document.getElementById('taskDate').value,
             startTime: isOffDay ? '00:00' : document.getElementById('taskStartTime').value,
             endTime: isOffDay ? '00:00' : document.getElementById('taskEndTime').value,
             isOffDay: isOffDay
         };
         
         if (App.editingId) {
+            // Edit Mode: Single Entry Update
+            // When editing, we stick to the single date input
+            const taskDate = document.getElementById('taskDate').value;
+            const formData = { ...baseData, date: taskDate };
             EntryManager.updateEntry(App.editingId, formData);
         } else {
-            EntryManager.addEntry(formData);
+            // Add Mode
+            if (isOffDay) {
+                // Check if we are using the range inputs
+                const rangeDateGroup = document.getElementById('rangeDateGroup');
+                // Use range if it is visible (which it should be based on handleOffDayToggle)
+                // or just check the values.
+                
+                const startStr = document.getElementById('offDayStartDate').value;
+                const endStr = document.getElementById('offDayEndDate').value;
+                
+                if (startStr && endStr) {
+                    // Create Multiple Entries
+                    const startDate = new Date(startStr);
+                    const endDate = new Date(endStr);
+                    
+                    if (startDate > endDate) {
+                        alert('Start date must be before end date');
+                        return;
+                    }
+
+                    // Iterate
+                    const entriesToAdd = [];
+                    const current = new Date(startDate);
+                    while (current <= endDate) {
+                        const dateStr = current.toISOString().split('T')[0];
+                        entriesToAdd.push({
+                            ...baseData,
+                            date: dateStr
+                        });
+                        current.setDate(current.getDate() + 1);
+                    }
+                    if(entriesToAdd.length > 0) {
+                         EntryManager.addEntries(entriesToAdd);
+                    }
+                } else {
+                    // Fallback to single date if user somehow bypassed UI or we decide to support mixed mode
+                    // But our UI logic enforces range for off-day add. 
+                    // Let's assume validation caught it if fields were required.
+                    // If they are empty, the browser required check might have failed, but we are inside submit only if it passed?
+                    // The inputs are 'date', so they have validity.
+                    
+                    // If start/end empty, maybe it's the single date picker visible?
+                    // Safest is to check visibility
+                    if (rangeDateGroup && rangeDateGroup.style.display !== 'none') {
+                         // Should have been caught by required attribute
+                         return; // Browser shows error
+                    } else {
+                         // Single date fallback
+                         EntryManager.addEntry({
+                            ...baseData,
+                            date: document.getElementById('taskDate').value
+                        });
+                    }
+                }
+            } else {
+                // Normal Single Entry
+                EntryManager.addEntry({
+                    ...baseData,
+                    date: document.getElementById('taskDate').value
+                });
+            }
         }
         
         // Save recent title if not off-day
-        if (!isOffDay && formData.title) {
+        if (!isOffDay && baseData.title) {
             const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
-            if (!recentTitles.includes(formData.title)) {
-                recentTitles.unshift(formData.title);
+            if (!recentTitles.includes(baseData.title)) {
+                recentTitles.unshift(baseData.title);
                 if (recentTitles.length > 50) recentTitles.pop();
                 localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
             }

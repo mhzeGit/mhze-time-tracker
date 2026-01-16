@@ -203,16 +203,24 @@
                 <button class="close-btn" id="closeModal">&times;</button>
             </div>
             <form id="taskForm">
-                <div class="form-group">
-                    <label class="checkbox-label">
+                <div class="form-group toggle-group">
+                    <span class="toggle-label-text">Off Day Mode</span>
+                    <label class="toggle-switch">
                         <input type="checkbox" id="taskIsOffDay">
-                        <span>Off Day (Holiday/Skip)</span>
+                        <span class="slider"></span>
                     </label>
+                    <span class="toggle-description">Mark as holiday/non-working days</span>
                 </div>
-                <div class="form-group">
-                    <label for="taskTitle">Title *</label>
-                    <input type="text" id="taskTitle" required placeholder="e.g., Development work">
+                
+                <!-- Normal Task Fields -->
+                <div id="regularTaskFields">
+                    <div class="form-group">
+                        <label for="taskTitle">Title *</label>
+                        <input type="text" id="taskTitle" required placeholder="e.g., Development work">
+                    </div>
                 </div>
+
+                <!-- Shared/Swapped Fields -->
                 <div class="form-group">
                     <label for="taskType">Type *</label>
                     <div class="custom-select-wrapper">
@@ -230,10 +238,25 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
+
+                <!-- Single Date (Standard) -->
+                <div class="form-group" id="singleDateGroup">
                     <label for="taskDate">Date *</label>
                     <input type="date" id="taskDate" required>
                 </div>
+
+                <!-- Date Range (Off Day Mode) -->
+                <div class="form-row" id="rangeDateGroup" style="display: none;">
+                    <div class="form-group">
+                        <label for="offDayStartDate">From Date *</label>
+                        <input type="date" id="offDayStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="offDayEndDate">To Date *</label>
+                        <input type="date" id="offDayEndDate">
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="taskStartTime">Start Time *</label>
