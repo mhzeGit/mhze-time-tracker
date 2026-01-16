@@ -25,8 +25,10 @@ const UIRenderer = {
         document.getElementById('weeklyAverage').textContent = 
             Helpers.formatDuration(Analytics.getWeeklyAverage());
         
+        // Count entries excluding off-days for statistics
+        const entriesExcludingOffDays = Analytics.getEntriesToAnalyzeExcludingOffDays();
         document.getElementById('totalEntries').textContent = 
-            filteredEntries.length;
+            entriesExcludingOffDays.length;
         
         document.getElementById('totalTime').textContent = 
             Helpers.formatDuration(Analytics.getTotalTime());
@@ -38,12 +40,15 @@ const UIRenderer = {
     renderTypes() {
         const container = document.getElementById('typeList');
         
-        if (App.data.types.length === 0) {
+        // Filter out system types
+        const displayTypes = App.data.types.filter(t => t.id !== App.SYSTEM_OFF_DAY_TYPE_ID);
+
+        if (displayTypes.length === 0) {
             container.innerHTML = '<p class="empty-state">No types defined. Click "Add Type" to create one.</p>';
             return;
         }
         
-        container.innerHTML = App.data.types.map(type => `
+        container.innerHTML = displayTypes.map(type => `
             <div class="type-item" data-id="${type.id}">
                 <div class="type-color-indicator" style="background-color: ${type.color};"></div>
                 <div class="type-name">${Helpers.escapeHtml(type.name)}</div>
@@ -95,8 +100,10 @@ const UIRenderer = {
             </div>
         `;
 
-        // Add type options with colored indicators
-        App.data.types.forEach(type => {
+        // Add type options with colored indicators (exclude system types)
+        App.data.types
+            .filter(t => t.id !== App.SYSTEM_OFF_DAY_TYPE_ID)
+            .forEach(type => {
             const option = document.createElement('div');
             option.className = 'custom-option';
             option.dataset.value = type.id;
@@ -114,7 +121,11 @@ const UIRenderer = {
         // Update trigger text and color preview based on current selection
         if (currentValue) {
             const selectedType = App.data.types.find(t => t.id === currentValue);
-            if (selectedType) {
+            // If selected type is the hidden system type (off day), show specific text
+            if (currentValue === App.SYSTEM_OFF_DAY_TYPE_ID) {
+                trigger.textContent = 'Off Day';
+                if (colorPreview) colorPreview.style.backgroundColor = '#cccccc';
+            } else if (selectedType) {
                 trigger.textContent = selectedType.name;
                 if (colorPreview) {
                     colorPreview.style.backgroundColor = selectedType.color;
@@ -129,6 +140,7 @@ const UIRenderer = {
                     }
                 });
             } else {
+                // ... (handling deleted or missing types)
                 trigger.textContent = 'Select a type...';
                 if (colorPreview) {
                     colorPreview.style.backgroundColor = 'transparent';

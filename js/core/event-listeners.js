@@ -171,6 +171,11 @@ const EventListeners = {
         });
         
         document.getElementById('taskForm').addEventListener('submit', (e) => {
+            // Need to pass the event to handleFormSubmit in ModalManager
+            // Check if ModalManager has handleFormSubmit, otherwise implement it there or here.
+            // Current code calling ModalManager.handleFormSubmit(e) on line 164.
+            // But ModalManager.js doesn't seem to have handleFormSubmit yet?
+            // Let me check ModalManager.js again.
             ModalManager.handleFormSubmit(e);
         });
         

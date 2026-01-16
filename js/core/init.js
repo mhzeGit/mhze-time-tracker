@@ -10,6 +10,19 @@ function initApp() {
         // No cache, start with empty data
         App.data = DataManager.createEmptyData();
     }
+
+    // Ensure system off-day type exists
+    const hasOffDayType = App.data.types.some(t => t.id === App.SYSTEM_OFF_DAY_TYPE_ID);
+    if (!hasOffDayType) {
+        App.data.types.push({
+            id: App.SYSTEM_OFF_DAY_TYPE_ID,
+            name: 'Off Day',
+            color: '#cccccc', // Neutral gray
+            isSystem: true // Flag to identify system types if needed later
+        });
+        // Save cache to persist the new type
+        CacheManager.saveCache();
+    }
     
     // Setup all event listeners
     EventListeners.setup();

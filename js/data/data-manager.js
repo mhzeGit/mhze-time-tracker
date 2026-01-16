@@ -121,9 +121,24 @@ const DataManager = {
         
         // Validate each entry
         for (const entry of data.entries) {
-            if (!entry.id || !entry.title || !entry.typeId || !entry.date || 
-                !entry.startTime || !entry.endTime || typeof entry.durationMinutes !== 'number') {
-                return false;
+            // Check for required fields based on isOffDay property
+            if (!entry.id || !entry.title || !entry.date) return false;
+            
+            // Allow missing values for off-day entries
+            if (!entry.isOffDay) {
+                if (!entry.typeId || !entry.startTime || !entry.endTime || typeof entry.durationMinutes !== 'number') {
+                    return false;
+                }
+            } else {
+                // For off-day entries, just ensure these fields are present if needed, 
+                // but our app logic handles nulls fairly gracefully or we can validate them loosely.
+                // However, since we save 00:00 and duration 0, basic checks should pass if keys exist.
+                // If keys are missing in old data, we might have issues.
+                // Let's assume standardized structure even for off-days.
+                // But wait, user asked "can not edit any values such as ... task type".
+                // We set typeId to null in UI for off-days.
+                // So strict check `!entry.typeId` will fail for off-day entries.
+                // We must skip typeId check if isOffDay is true.
             }
         }
         

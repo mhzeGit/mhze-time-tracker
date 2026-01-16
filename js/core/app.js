@@ -20,7 +20,9 @@ const App = {
     charts: {
         pie: null,
         timeGraph: null
-    }
+    },
+    // System Constants
+    SYSTEM_OFF_DAY_TYPE_ID: 'SYSTEM_OFF_DAY'
 };
 
 // Make App globally available

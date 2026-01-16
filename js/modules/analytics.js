@@ -11,10 +11,18 @@ const Analytics = {
     },
 
     /**
+     * Get entries excluding off-day types (for statistics calculations)
+     */
+    getEntriesToAnalyzeExcludingOffDays() {
+        const entries = this.getEntriesToAnalyze();
+        return entries.filter(entry => !entry.isOffDay);
+    },
+
+    /**
      * Calculate daily average
      */
     getDailyAverage() {
-        const dailyTotals = this.getDailyTotals();
+        const dailyTotals = this.getDailyTotalsExcludingOffDays();
         const days = Object.keys(dailyTotals).length;
         
         if (days === 0) return 0;
@@ -27,7 +35,7 @@ const Analytics = {
      * Calculate weekly average
      */
     getWeeklyAverage() {
-        const weeklyTotals = this.getWeeklyTotals();
+        const weeklyTotals = this.getWeeklyTotalsExcludingOffDays();
         const weeks = Object.keys(weeklyTotals).length;
         
         if (weeks === 0) return 0;
@@ -37,10 +45,10 @@ const Analytics = {
     },
 
     /**
-     * Get total time across all entries
+     * Get total time across all entries (excluding off-days)
      */
     getTotalTime() {
-        const entries = this.getEntriesToAnalyze();
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
         return entries.reduce((sum, entry) => sum + entry.durationMinutes, 0);
     },
 
@@ -62,11 +70,35 @@ const Analytics = {
     },
 
     /**
+     * Get daily totals excluding off-days (for statistics)
+     */
+    getDailyTotalsExcludingOffDays() {
+        const totals = {};
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
+        
+        entries.forEach(entry => {
+            if (!totals[entry.date]) {
+                totals[entry.date] = 0;
+            }
+            totals[entry.date] += entry.durationMinutes;
+        });
+        
+        return totals;
+    },
+
+    /**
      * Get daily totals by type
+     * Updated to filter out off-day entries completely if user wants to skip them visually
+     * But user says "skips those dasy visually in the graph too"
+     * If we want to skip days visually, we need to ensure they don't contribute to "gaps" either if they are the boundary?
+     * Or simply filter them out here.
+     * Currently `getEntriesToAnalyze` returns everything from FilterManager.
+     * If we filter out `isOffDay` entries here, they won't appear in the graph.
      */
     getDailyTotalsByType() {
         const totals = {};
-        const entries = this.getEntriesToAnalyze();
+        // Use excluding off-days to hide them from graph entirely
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
         
         entries.forEach(entry => {
             if (!totals[entry.date]) {
@@ -100,11 +132,30 @@ const Analytics = {
     },
 
     /**
+     * Get weekly totals excluding off-days (for statistics)
+     */
+    getWeeklyTotalsExcludingOffDays() {
+        const totals = {};
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
+        
+        entries.forEach(entry => {
+            const weekKey = this.getWeekKey(entry.date);
+            if (!totals[weekKey]) {
+                totals[weekKey] = 0;
+            }
+            totals[weekKey] += entry.durationMinutes;
+        });
+        
+        return totals;
+    },
+
+    /**
      * Get weekly totals by type
      */
     getWeeklyTotalsByType() {
         const totals = {};
-        const entries = this.getEntriesToAnalyze();
+        // Use excluding off-days to hide them from graph entirely
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
         
         entries.forEach(entry => {
             const weekKey = this.getWeekKey(entry.date);
@@ -125,7 +176,7 @@ const Analytics = {
      */
     getTimePerType() {
         const totals = {};
-        const entries = this.getEntriesToAnalyze();
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
         
         entries.forEach(entry => {
             if (!totals[entry.typeId]) {
@@ -261,7 +312,8 @@ const Analytics = {
      */
     getMonthlyTotalsByType() {
         const totals = {};
-        const entries = this.getEntriesToAnalyze();
+        // Use excluding off-days to hide them from graph entirely
+        const entries = this.getEntriesToAnalyzeExcludingOffDays();
 
         entries.forEach(entry => {
             const monthKey = this.getMonthKey(entry.date);

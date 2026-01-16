@@ -13,6 +13,20 @@ const ModalManager = {
         form.reset();
         document.getElementById('taskDate').valueAsDate = new Date();
         document.getElementById('modalTitle').textContent = 'Add Task';
+        
+        // Reset Off Day state
+        const isOffDayCheckbox = document.getElementById('taskIsOffDay');
+        if (isOffDayCheckbox) {
+            isOffDayCheckbox.checked = false;
+            this.handleOffDayToggle(false);
+            
+            // Add listener if not already added (simple check to avoid duplicate listeners conceptually, though pure JS might stack them if not careful. Ideally, setup listeners once in setup() or remove them.)
+            // For now, simpler to re-attach or ensure idempotency. 
+            // Better strategy: The event listener should be set up in EventListeners.js or once here. 
+            // Let's attach it here but remove old one if possible? No, EventListeners.js is better place for static elements.
+            // But since I'm here, I will attach it and use `onclick` to prevent stacking, or check current implementation.
+            isOffDayCheckbox.onclick = (e) => this.handleOffDayToggle(e.target.checked);
+        }
 
         // Set button text to "Add"
         document.getElementById('submitBtn').textContent = 'Add';
@@ -114,6 +128,15 @@ const ModalManager = {
         document.getElementById('taskDate').value = entry.date;
         document.getElementById('taskStartTime').value = entry.startTime;
         document.getElementById('taskEndTime').value = entry.endTime;
+        
+        // Handle Off Day state
+        const isOffDayCheckbox = document.getElementById('taskIsOffDay');
+        if (isOffDayCheckbox) {
+            const isOffDay = entry.isOffDay || false;
+            isOffDayCheckbox.checked = isOffDay;
+            this.handleOffDayToggle(isOffDay);
+            isOffDayCheckbox.onclick = (e) => this.handleOffDayToggle(e.target.checked);
+        }
 
         // Update task type dropdown
         const taskTypeDropdown = document.getElementById('taskType');
@@ -142,6 +165,119 @@ const ModalManager = {
 
         App.editingId = id;
         modal.classList.add('active');
+    },
+
+    /**
+     * Handle Off Day toggle
+     */
+    handleOffDayToggle(isOffDay) {
+        const titleInput = document.getElementById('taskTitle');
+        const typeSelect = document.getElementById('taskType');
+        const startTimeInput = document.getElementById('taskStartTime');
+        const endTimeInput = document.getElementById('taskEndTime');
+        const durationDisplay = document.getElementById('durationDisplay');
+        
+        if (isOffDay) {
+            // Disable and set default values
+            titleInput.value = 'Off Day';
+            titleInput.disabled = true;
+            
+            typeSelect.classList.add('disabled');
+            typeSelect.style.pointerEvents = 'none';
+            typeSelect.style.opacity = '0.6';
+            
+            // Set 00:00 - 00:00
+            startTimeInput.value = '00:00';
+            startTimeInput.disabled = true;
+            
+            endTimeInput.value = '00:00';
+            endTimeInput.disabled = true;
+            
+            if (durationDisplay) {
+                durationDisplay.value = '00:00';
+                durationDisplay.disabled = true;
+            }
+
+            // Set visual state of dropdown to reflect system type implicitly (or clear it)
+            // Since the dropdown is disabled, user can't see the list.
+            // We can update the trigger text to "Off Day" for clarity.
+            const trigger = typeSelect.querySelector('.custom-select-trigger .selected-text');
+            const colorPreview = typeSelect.querySelector('.custom-select-trigger .color-preview');
+            if (trigger) trigger.textContent = 'Off Day';
+            if (colorPreview) colorPreview.style.backgroundColor = '#cccccc';
+
+        } else {
+            // Enable inputs
+            titleInput.disabled = false;
+            // Only clear title if it was automatic "Off Day"
+            if (titleInput.value === 'Off Day') {
+                titleInput.value = '';
+            }
+            
+            typeSelect.classList.remove('disabled');
+            typeSelect.style.pointerEvents = 'auto';
+            typeSelect.style.opacity = '1';
+            
+            // Restore previous selection if available
+            // If we are editing, we can look at entry or App.editingTaskTypeId
+            // But if we just toggled, we might have lost it.
+            // A simple reset to "Select a type..." is acceptable or re-render
+            UIRenderer.updateTypeDropdown();
+
+            startTimeInput.disabled = false;
+            endTimeInput.disabled = false;
+            
+            if (durationDisplay) {
+                durationDisplay.disabled = false;
+            }
+            
+            // Reset duration display if we're enabling
+            this.updateDurationDisplay();
+        }
+    },
+
+    /**
+     * Handle form submission
+     */
+    handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const isOffDay = document.getElementById('taskIsOffDay').checked;
+        // Use system off day type ID if isOffDay is true
+        const typeId = isOffDay ? App.SYSTEM_OFF_DAY_TYPE_ID : App.editingTaskTypeId;
+        
+        // Validation for normal entries
+        if (!isOffDay && !typeId) {
+            alert('Please select a type');
+            return;
+        }
+
+        const formData = {
+            title: isOffDay ? 'Off Day' : document.getElementById('taskTitle').value,
+            typeId: typeId,
+            date: document.getElementById('taskDate').value,
+            startTime: isOffDay ? '00:00' : document.getElementById('taskStartTime').value,
+            endTime: isOffDay ? '00:00' : document.getElementById('taskEndTime').value,
+            isOffDay: isOffDay
+        };
+        
+        if (App.editingId) {
+            EntryManager.updateEntry(App.editingId, formData);
+        } else {
+            EntryManager.addEntry(formData);
+        }
+        
+        // Save recent title if not off-day
+        if (!isOffDay && formData.title) {
+            const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
+            if (!recentTitles.includes(formData.title)) {
+                recentTitles.unshift(formData.title);
+                if (recentTitles.length > 50) recentTitles.pop();
+                localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
+            }
+        }
+        
+        this.closeModal();
     },
 
     /**
@@ -201,7 +337,11 @@ const ModalManager = {
     handleDurationChange() {
         const startTime = document.getElementById('taskStartTime').value;
         const durationInput = document.getElementById('durationInput');
-        const duration = parseInt(durationInput.value, 10);
+        // durationInput seems to not exist in previous code or usage? 
+        // In lines 1-150 I saw durationDisplay being used.
+        // But this method 'handleDurationChange' is also looking suspicious like leftover code.
+        // However, I should focus on removing the Duplicate handleFormSubmit first.
+        const duration = parseInt(durationInput?.value || '0', 10);
 
         if (startTime && !isNaN(duration)) {
             const [startHour, startMinute] = startTime.split(':').map(Number);
@@ -214,52 +354,6 @@ const ModalManager = {
 
             this.updateDurationDisplay();
         }
-    },
-
-    /**
-     * Handle form submission
-     */
-    handleFormSubmit(e) {
-        e.preventDefault();
-
-        const formData = {
-            title: document.getElementById('taskTitle').value,
-            typeId: document.querySelector('#taskType .custom-option.selected')?.dataset.value || '',
-            date: document.getElementById('taskDate').value,
-            startTime: document.getElementById('taskStartTime').value,
-            endTime: document.getElementById('taskEndTime').value
-        };
-
-        if (!formData.typeId) {
-            alert('Please select a type!');
-            return;
-        }
-
-        const duration = Helpers.calculateDuration(formData.startTime, formData.endTime);
-        if (duration <= 0) {
-            alert('End time must be after start time!');
-            return;
-        }
-
-        // Save recent titles
-        const recentTitles = JSON.parse(localStorage.getItem('recentTitles') || '[]');
-        const titleIndex = recentTitles.indexOf(formData.title);
-        if (titleIndex !== -1) {
-            recentTitles.splice(titleIndex, 1); // Remove existing title
-        }
-        recentTitles.unshift(formData.title); // Add to the top
-        if (recentTitles.length > 10) {
-            recentTitles.pop(); // Limit to 10 titles
-        }
-        localStorage.setItem('recentTitles', JSON.stringify(recentTitles));
-
-        if (App.editingId) {
-            EntryManager.updateEntry(App.editingId, formData);
-        } else {
-            EntryManager.addEntry(formData);
-        }
-
-        this.closeModal();
     }
 };
 

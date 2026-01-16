@@ -14,7 +14,8 @@ const EntryManager = {
             date: entry.date || new Date().toISOString().split('T')[0],
             startTime: entry.startTime || '00:00',
             endTime: entry.endTime || '01:00',
-            durationMinutes: Helpers.calculateDuration(entry.startTime, entry.endTime)
+            durationMinutes: Helpers.calculateDuration(entry.startTime, entry.endTime),
+            isOffDay: entry.isOffDay || false
         };
         
         App.data.entries.push(newEntry);
@@ -32,7 +33,8 @@ const EntryManager = {
             App.data.entries[index] = {
                 ...App.data.entries[index],
                 ...updatedData,
-                durationMinutes: Helpers.calculateDuration(updatedData.startTime, updatedData.endTime)
+                durationMinutes: Helpers.calculateDuration(updatedData.startTime, updatedData.endTime),
+                isOffDay: updatedData.isOffDay !== undefined ? updatedData.isOffDay : (App.data.entries[index].isOffDay || false)
             };
             
             this.sortEntries();
