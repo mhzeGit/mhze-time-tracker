@@ -174,6 +174,7 @@ const ModalManager = {
      */
     handleOffDayToggle(isOffDay) {
         const regularFields = document.getElementById('regularTaskFields');
+        const titleInput = document.getElementById('taskTitle');
         const singleDateGroup = document.getElementById('singleDateGroup');
         const rangeDateGroup = document.getElementById('rangeDateGroup');
         const typeSelect = document.getElementById('taskType');
@@ -185,6 +186,7 @@ const ModalManager = {
         if (isOffDay) {
             // Hide regular title field
             if (regularFields) regularFields.style.display = 'none';
+            if (titleInput) titleInput.required = false;
 
             // Disable Type Selection
             typeSelect.classList.add('disabled');
@@ -229,6 +231,7 @@ const ModalManager = {
         } else {
             // Show regular fields
             if (regularFields) regularFields.style.display = 'block';
+            if (titleInput) titleInput.required = true;
             
             // Enable Inputs
             typeSelect.classList.remove('disabled');
