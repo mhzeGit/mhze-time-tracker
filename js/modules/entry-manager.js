@@ -12,36 +12,15 @@ const EntryManager = {
             title: entry.title || 'Untitled Entry',
             typeId: entry.typeId || null,
             date: entry.date || new Date().toISOString().split('T')[0],
+            // For off-day ranges, include endDate - always preserve if provided
+            endDate: entry.endDate || null,
             startTime: entry.startTime || '00:00',
             endTime: entry.endTime || '01:00',
-            durationMinutes: Helpers.calculateDuration(entry.startTime, entry.endTime),
+            durationMinutes: Helpers.calculateDuration(entry.startTime || '00:00', entry.endTime || '00:00'),
             isOffDay: entry.isOffDay || false
         };
         
         App.data.entries.push(newEntry);
-        this.sortEntries();
-        CacheManager.saveCache();
-        UIRenderer.renderAll();
-    },
-
-    /**
-     * Add multiple entries at once (Batch)
-     */
-    addEntries(entries = []) {
-        entries.forEach(entry => {
-             const newEntry = {
-                id: Helpers.generateUUID(),
-                title: entry.title || 'Untitled Entry',
-                typeId: entry.typeId || null,
-                date: entry.date || new Date().toISOString().split('T')[0],
-                startTime: entry.startTime || '00:00',
-                endTime: entry.endTime || '01:00',
-                durationMinutes: Helpers.calculateDuration(entry.startTime || '00:00', entry.endTime || '00:00'),
-                isOffDay: entry.isOffDay || false
-            };
-            App.data.entries.push(newEntry);
-        });
-        
         this.sortEntries();
         CacheManager.saveCache();
         UIRenderer.renderAll();

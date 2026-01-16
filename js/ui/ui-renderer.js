@@ -221,6 +221,11 @@ const UIRenderer = {
             const typeName = type ? type.name : 'Unknown';
             const typeColor = type ? type.color : '#64748b';
             
+            let dateDisplay = Helpers.formatShortDate(entry.date);
+            if (entry.endDate && entry.endDate !== entry.date) {
+                dateDisplay = `${Helpers.formatShortDate(entry.date)} - ${Helpers.formatShortDate(entry.endDate)}`;
+            }
+
             return `
                 <div class="entry-row" data-id="${entry.id}">
                     <div class="entry-col entry-col-title" data-label="Title">${Helpers.escapeHtml(entry.title)}</div>
@@ -228,7 +233,7 @@ const UIRenderer = {
                         <span class="entry-type-dot" style="background-color: ${typeColor};"></span>
                         ${Helpers.escapeHtml(typeName)}
                     </div>
-                    <div class="entry-col entry-col-date" data-label="Date">${Helpers.formatShortDate(entry.date)}</div>
+                    <div class="entry-col entry-col-date" data-label="Date">${dateDisplay}</div>
                     <div class="entry-col entry-col-time" data-label="Start">${entry.startTime}</div>
                     <div class="entry-col entry-col-time" data-label="End">${entry.endTime}</div>
                     <div class="entry-col entry-col-duration" data-label="Duration">${Helpers.formatDuration(entry.durationMinutes)}</div>

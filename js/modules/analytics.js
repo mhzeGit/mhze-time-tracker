@@ -214,7 +214,46 @@ const Analytics = {
     },
 
     /**
-     * Get all days from first to last entry (including days with 0 hours)
+     * Get off-day date set (all individual dates that are off)
+     */
+    getOffDayDatesSet() {
+        const offDates = new Set();
+        
+        App.data.entries
+            .filter(e => e.isOffDay === true)
+            .forEach(e => {
+                // Handle both range entries (with endDate) and single-date off-day entries
+                const startDateStr = e.date;
+                const endDateStr = e.endDate || e.date; // If no endDate, use date as both start and end
+                
+                // Parse dates properly
+                const startDate = new Date(startDateStr + 'T12:00:00'); // Use noon to avoid timezone issues
+                const endDate = new Date(endDateStr + 'T12:00:00');
+                
+                // Add each individual date in the range to the set
+                const current = new Date(startDate);
+                while (current <= endDate) {
+                    const year = current.getFullYear();
+                    const month = String(current.getMonth() + 1).padStart(2, '0');
+                    const day = String(current.getDate()).padStart(2, '0');
+                    offDates.add(`${year}-${month}-${day}`);
+                    current.setDate(current.getDate() + 1);
+                }
+            });
+        
+        return offDates;
+    },
+
+    /**
+     * Check if a date string is an off-day
+     */
+    isDateOff(dateStr) {
+        const offDates = this.getOffDayDatesSet();
+        return offDates.has(dateStr);
+    },
+
+    /**
+     * Get all days from first to last entry (including days with 0 hours, but IGNORING Off Days)
      */
     getAllDaysDataWithGaps() {
         const dailyTotalsByType = this.getDailyTotalsByType();
@@ -222,8 +261,11 @@ const Analytics = {
         
         if (dates.length === 0) return [];
         
-        const firstDate = new Date(dates[0]);
-        const lastDate = new Date(dates[dates.length - 1]);
+        // Get off-day dates set for fast lookup
+        const offDates = this.getOffDayDatesSet();
+        
+        const firstDate = new Date(dates[0] + 'T00:00:00');
+        const lastDate = new Date(dates[dates.length - 1] + 'T00:00:00');
         
         const data = [];
         const currentDate = new Date(firstDate);
@@ -231,6 +273,12 @@ const Analytics = {
         while (currentDate <= lastDate) {
             const dateStr = currentDate.toISOString().split('T')[0];
             
+            // SKIP this date if it is an Off Day
+            if (offDates.has(dateStr)) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                continue;
+            }
+
             const typeData = {};
             let total = 0;
             
@@ -253,6 +301,73 @@ const Analytics = {
     },
 
     /**
+     * Get off-day date ranges (for week/month level checks)
+     */
+    getOffDayRanges() {
+        return App.data.entries
+            .filter(e => e.isOffDay === true)
+            .map(e => {
+                if (e.endDate) {
+                    return { start: e.date, end: e.endDate };
+                }
+                return { start: e.date, end: e.date };
+            });
+    },
+
+    /**
+     * Check if a week is completely covered by off-days
+     */
+    isWeekFullyOff(weekKey) {
+        const offDates = this.getOffDayDatesSet();
+        
+        // Calculate week date range
+        const [year, weekNum] = weekKey.split('-W').map(Number);
+        
+        // Simple ISO week calculation
+        const simpleDate = new Date(year, 0, 1 + (weekNum - 1) * 7);
+        const dayOfWeek = simpleDate.getDay();
+        const isoWeekStart = new Date(simpleDate);
+        if (dayOfWeek <= 4) {
+            isoWeekStart.setDate(simpleDate.getDate() - simpleDate.getDay() + 1);
+        } else {
+            isoWeekStart.setDate(simpleDate.getDate() + 8 - simpleDate.getDay());
+        }
+        
+        // Check if ALL 7 days of the week are off
+        const current = new Date(isoWeekStart);
+        for (let i = 0; i < 7; i++) {
+            const dateStr = current.toISOString().split('T')[0];
+            if (!offDates.has(dateStr)) {
+                return false; // At least one day is not off
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return true;
+    },
+
+    /**
+     * Check if a month is completely covered by off-days
+     */
+    isMonthFullyOff(monthKey) {
+        const offDates = this.getOffDayDatesSet();
+        
+        const [year, month] = monthKey.split('-').map(Number);
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0); // Last day of month
+        
+        // Check if ALL days of the month are off
+        const current = new Date(monthStart);
+        while (current <= monthEnd) {
+            const dateStr = current.toISOString().split('T')[0];
+            if (!offDates.has(dateStr)) {
+                return false; // At least one day is not off
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return true;
+    },
+
+    /**
      * Get all weeks from first to last entry (including weeks with 0 hours)
      */
     getAllWeeksDataWithGaps() {
@@ -268,6 +383,11 @@ const Analytics = {
         const allWeeks = this.getWeekRange(firstWeek, lastWeek);
         
         allWeeks.forEach(weekKey => {
+            // Skip weeks that are fully covered by off-days
+            if (this.isWeekFullyOff(weekKey)) {
+                return;
+            }
+
             const typeData = {};
             let total = 0;
             
@@ -355,6 +475,11 @@ const Analytics = {
         const allMonths = this.getMonthRange(firstMonth, lastMonth);
 
         allMonths.forEach(monthKey => {
+            // Skip months that are fully covered by off-days
+            if (this.isMonthFullyOff(monthKey)) {
+                return;
+            }
+
             const typeData = {};
             let total = 0;
 

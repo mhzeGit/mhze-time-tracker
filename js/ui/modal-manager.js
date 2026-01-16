@@ -292,20 +292,17 @@ const ModalManager = {
             // When editing, we stick to the single date input
             const taskDate = document.getElementById('taskDate').value;
             const formData = { ...baseData, date: taskDate };
+            // If editing an off-day range, we should preserve endDate but editing logic needs review
+            // For now, editing assumes single entry. If user edits a range, it converts to single.
             EntryManager.updateEntry(App.editingId, formData);
         } else {
             // Add Mode
             if (isOffDay) {
                 // Check if we are using the range inputs
-                const rangeDateGroup = document.getElementById('rangeDateGroup');
-                // Use range if it is visible (which it should be based on handleOffDayToggle)
-                // or just check the values.
-                
                 const startStr = document.getElementById('offDayStartDate').value;
                 const endStr = document.getElementById('offDayEndDate').value;
                 
                 if (startStr && endStr) {
-                    // Create Multiple Entries
                     const startDate = new Date(startStr);
                     const endDate = new Date(endStr);
                     
@@ -313,40 +310,20 @@ const ModalManager = {
                         alert('Start date must be before end date');
                         return;
                     }
-
-                    // Iterate
-                    const entriesToAdd = [];
-                    const current = new Date(startDate);
-                    while (current <= endDate) {
-                        const dateStr = current.toISOString().split('T')[0];
-                        entriesToAdd.push({
-                            ...baseData,
-                            date: dateStr
-                        });
-                        current.setDate(current.getDate() + 1);
-                    }
-                    if(entriesToAdd.length > 0) {
-                         EntryManager.addEntries(entriesToAdd);
-                    }
-                } else {
-                    // Fallback to single date if user somehow bypassed UI or we decide to support mixed mode
-                    // But our UI logic enforces range for off-day add. 
-                    // Let's assume validation caught it if fields were required.
-                    // If they are empty, the browser required check might have failed, but we are inside submit only if it passed?
-                    // The inputs are 'date', so they have validity.
                     
-                    // If start/end empty, maybe it's the single date picker visible?
-                    // Safest is to check visibility
-                    if (rangeDateGroup && rangeDateGroup.style.display !== 'none') {
-                         // Should have been caught by required attribute
-                         return; // Browser shows error
-                    } else {
-                         // Single date fallback
-                         EntryManager.addEntry({
-                            ...baseData,
-                            date: document.getElementById('taskDate').value
-                        });
-                    }
+                    // Create ONE entry representing the range
+                    EntryManager.addEntry({
+                        ...baseData,
+                        date: startStr,
+                        endDate: endStr
+                    });
+                } else {
+                    // Fallback or validation error. Required fields should catch this.
+                    // If user didn't pick range, try single regular date field (if UI broke)
+                     EntryManager.addEntry({
+                        ...baseData,
+                        date: document.getElementById('taskDate').value
+                    });
                 }
             } else {
                 // Normal Single Entry
